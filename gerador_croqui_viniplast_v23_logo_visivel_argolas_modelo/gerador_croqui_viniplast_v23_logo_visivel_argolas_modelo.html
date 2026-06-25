@@ -34,18 +34,21 @@
   .badge{display:inline-block;background:#eee;border:1px solid #ccc;border-radius:999px;padding:5px 9px;font-size:12px;margin:0 8px 8px 0}
   .warnbox{background:#fff4d8;border:1px solid #e0c66c;border-radius:8px;padding:8px;font-size:12px;margin-top:8px}
   #sheet,#mockup{background:#fff;border:1px solid #ddd}
-  #sheet{width:1123px;height:794px}
-  #mockup{width:1123px;height:811px;margin-top:12px}
+  #sheet{width:595px;height:842px}
+  #mockup{width:595px;height:430px;margin-top:0;display:block}
   .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
   .drag{cursor:move}
   .approval-page{page-break-after:always}
   .checkline{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
   .checkline input{width:auto}
   @media print{
-    header,.panel,.toolbar,#mockup{display:none}
+    header,.panel,.toolbar{display:none}
     main{display:block;padding:0}
     .preview{box-shadow:none;border-radius:0;padding:0}
-    #sheet{border:0;width:297mm;height:210mm}
+    #sheet{border:0;width:210mm;height:297mm}
+    #mockupWrap{page-break-before:always;display:block}
+    #mockupWrap b{display:none}
+    #mockup{border:0;width:210mm;height:148mm}
     body{background:#fff}
     svg .guide, svg .selectedBox {display:none !important}
   }
@@ -364,7 +367,11 @@
     <span class="badge">Arraste os logos dentro da área útil</span>
     <span class="badge" id="statusLogo">Nenhuma imagem carregada</span>
     </div>
-  <svg id="sheet" viewBox="0 0 1360 794" xmlns="http://www.w3.org/2000/svg"></svg>
+  <svg id="sheet" viewBox="0 0 595 842" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="mockupWrap" style="margin-top:16px">
+    <b style="font-size:13px;color:#444;display:block;margin-bottom:6px">2ª Página — Croqui na Lona</b>
+    <svg id="mockup" viewBox="0 0 1123 811" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
 </section>
 </main>
 
@@ -431,7 +438,7 @@ function form(){
     cor:$("corLona").value,
     material:$("material").value,
     acabamento:$("acabamento").value,
-    distLat:parseFloat($("distLateral").value||50),
+    distLateral:parseFloat($("distLateral").value||50),
     distTopo:parseFloat($("distTopo").value||33),
     topWidth:parseFloat($("topWidth").value||2.5),
     logoMargin:parseFloat($("logoMargin").value||0.15),
@@ -571,6 +578,16 @@ function syncSelectedLogoSize(source){
     if(h>0) $("selMaxW").value = Math.max(1, Math.round(h*ratio));
   }
 }
+function applySizeToAllFromSelected(){
+  const s = selectedLogo(); if(!s) return;
+  if($("applyAllSizes").value !== "sim") return;
+  logos.forEach(l=>{
+    if(l.id === s.id) return;
+    l.maxW = s.maxW;
+    l.maxH = s.maxH;
+    l.scale = s.scale;
+  });
+}
 function applySelectedScaleProportionally(){
   const s = selectedLogo(); if(!s) return;
   s.scale = parseFloat($("selScale").value||100);
@@ -667,12 +684,6 @@ function processFooterLogo(){
   autoCutoutFromDataUrl(footerLogoSourceData, {mode:"preserve", removeDarkBg:true, max:1800}, (res)=>{
     footerLogoData=res.dataUrl; footerLogoNaturalW=res.width; footerLogoNaturalH=res.height; renderAll(false);
   });
-}
-function hexToRgb(hex){
-  if(hex==="#fff" || hex==="#ffffff") return [255,255,255];
-  if(hex==="#111") return [17,17,17];
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "#1f2937");
-  return m ? [parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)] : [31,41,55];
 }
 function processLogo(){
   if(!uploadedImageData){ processedImageData=null; return; }
@@ -967,8 +978,8 @@ function getLogoRenderedMetrics(logo, f){
   const safe=getSafeRect(zone,f);
   const size=fitLogoSize(safe,zone,logo,f);
   const pos=logoPositionInSafe(safe,size,logo);
-  const realWmm = Math.round((logo.maxW||0) * ((logo.scale||100)/100) * (size.k||1));
-  const realHmm = Math.round((logo.maxH||0) * ((logo.scale||100)/100) * (size.k||1));
+  const realWmm = Math.round((logo.maxW||0) * ((logo.scale||100)/100));
+  const realHmm = Math.round((logo.maxH||0) * ((logo.scale||100)/100));
   return {zone,safe,size,pos,realWmm,realHmm};
 }
 function drawLogoChosenPanel(svg, x, y, w, h){
@@ -1031,84 +1042,114 @@ function drawPartnerLogoOnCroqui(g, mzones, f){
 function renderCroqui(updateList=true){
   const f=form(); calcInfo();
   const svg=$("sheet"); svg.innerHTML="";
-  el("rect",{x:0,y:0,width:1360,height:794,fill:"#fff"},svg);
+  const W=595, H=842;
 
-  drawApprovalSide(svg, f.codigo);
-  text(svg,f.codigo.replace("CÓD.: ","CÓD.: "),85,42,18,"700","start","#1e9ad6");
-  text(svg,"LAYOUT PARA APROVAÇÃO",620,92,42,"900","middle","#555");
-  drawLogoChosenPanel(svg, 1015, 135, 300, 300);
+  // Fundo branco
+  el("rect",{x:0,y:0,width:W,height:H,fill:"#fff"},svg);
 
-  const rect=getMainRect(f), zones=getZones(rect,f);
-  // Approval style: center the croqui slightly lower and narrower to mimic current approval file
-  const scaleGroup=el("g",{transform:"translate(70 0)"},svg);
-  const g=el("g",{},scaleGroup);
+  // Faixa lateral: vermelho (topo ~58%) + cinza (base ~42%)
+  const SW=26, SB=490;
+  el("rect",{x:0,y:0,width:SW,height:SB,fill:"#c8100a"},svg);
+  el("rect",{x:0,y:SB,width:SW,height:H-SB,fill:"#5a5a5a"},svg);
 
-  el("rect",{x:rect.x,y:rect.y+10,width:rect.w*0.78,height:rect.h*0.90,fill:codeColor(f.cor),stroke:"#111","stroke-width":2.4},g);
+  // Código — vermelho, centralizado no topo
+  const cx=SW+(W-SW)/2;
+  const codeEl=el("text",{x:cx,y:36,"font-size":11,"font-weight":"700","text-anchor":"middle",fill:"#c8100a"},svg);
+  codeEl.textContent=f.codigo;
 
-  const drawRect = {x:rect.x, y:rect.y+10, w:rect.w*0.78, h:rect.h*0.90};
-  drawFasteners(g, drawRect, f);
-  const ratioScaleX = drawRect.w / rect.w, ratioScaleY = drawRect.h / rect.h;
-  function mapZone(z){
-    return {
-      x: drawRect.x + (z.x-rect.x)*ratioScaleX,
-      y: drawRect.y + (z.y-rect.y)*ratioScaleY,
-      w: z.w*ratioScaleX,
-      h: z.h*ratioScaleY,
-      label:z.label, realW:z.realW, realH:z.realH, fitW:z.fitW, fitH:z.fitH
-    }
+  // Título — itálico bold grande
+  const titleEl=el("text",{x:cx,y:84,"font-size":34,"font-weight":"900","text-anchor":"middle",fill:"#1a1a1a","font-style":"italic"},svg);
+  titleEl.textContent="LAYOUT PARA APROVAÇÃO";
+
+  // ── LOGO PRINCIPAL ──
+  const S=selectedLogo()||logos[0]||null;
+  const realW=S?Math.round((S.maxW||f.logoW)*((S.scale||100)/100)):Math.round(f.logoW);
+  const realH=S?Math.round((S.maxH||f.logoH)*((S.scale||100)/100)):Math.round(f.logoH);
+  const logoRatio=(logoNaturalW&&logoNaturalH)?(logoNaturalW/logoNaturalH):(realW/Math.max(1,realH));
+
+  const LMW=400, LMH=310;
+  let ldW=LMW, ldH=ldW/logoRatio;
+  if(ldH>LMH){ldH=LMH; ldW=ldH*logoRatio;}
+  const logoX=cx-ldW/2, logoY=130;
+
+  // Cota de largura (acima do logo)
+  const dwY=logoY-20;
+  el("line",{x1:logoX,y1:dwY,x2:logoX+ldW,y2:dwY,stroke:"#111","stroke-width":0.9},svg);
+  el("line",{x1:logoX,y1:dwY-6,x2:logoX,y2:dwY+6,stroke:"#111","stroke-width":0.9},svg);
+  el("line",{x1:logoX+ldW,y1:dwY-6,x2:logoX+ldW,y2:dwY+6,stroke:"#111","stroke-width":0.9},svg);
+  const dwEl=el("text",{x:cx,y:dwY-5,"font-size":10,"text-anchor":"middle",fill:"#111"},svg);
+  dwEl.textContent=`${realW}mm`;
+
+  // Cota de altura (à esquerda do logo)
+  const dhX=logoX-20;
+  el("line",{x1:dhX,y1:logoY,x2:dhX,y2:logoY+ldH,stroke:"#111","stroke-width":0.9},svg);
+  el("line",{x1:dhX-6,y1:logoY,x2:dhX+6,y2:logoY,stroke:"#111","stroke-width":0.9},svg);
+  el("line",{x1:dhX-6,y1:logoY+ldH,x2:dhX+6,y2:logoY+ldH,stroke:"#111","stroke-width":0.9},svg);
+  const dhEl=el("text",{x:dhX-9,y:logoY+ldH/2,"font-size":10,"text-anchor":"middle",fill:"#111",transform:`rotate(-90 ${dhX-9} ${logoY+ldH/2})`},svg);
+  dhEl.textContent=`${realH}mm`;
+
+  // Imagem do logo
+  if($("logoModo").value!=="placeholder"&&processedImageData){
+    el("image",{href:processedImageData,x:logoX,y:logoY,width:ldW,height:ldH,preserveAspectRatio:"xMidYMid meet"},svg);
+  } else {
+    el("rect",{x:logoX,y:logoY,width:ldW,height:ldH,rx:4,fill:"none",stroke:"#ccc","stroke-width":1.4,"stroke-dasharray":"6 4"},svg);
+    const plEl=el("text",{x:cx,y:logoY+ldH/2+7,"font-size":20,"font-weight":"700","text-anchor":"middle",fill:"#ccc"},svg);
+    plEl.textContent="LOGO";
   }
-  const mzones = {};
-  Object.keys(zones).forEach(k=>mzones[k]=mapZone(zones[k]));
 
-  // dashed seam / margin, visible in approval template but tagged as guide for clean print exports if desired
-  if(showGuides()){
-    const seam=10;
-    el("rect",{x:drawRect.x+seam,y:drawRect.y+seam,width:drawRect.w-2*seam,height:drawRect.h-2*seam,fill:"none",stroke:"#666","stroke-width":0.8,"stroke-dasharray":"7 5","stroke-opacity":0.45,class:"guide"},g);
-    el("line",{x1:drawRect.x+drawRect.w/2,y1:drawRect.y+drawRect.h*0.25,x2:drawRect.x+drawRect.w/2,y2:drawRect.y+drawRect.h*0.78,stroke:"#777","stroke-width":0.8,"stroke-dasharray":"4 4","stroke-opacity":0.35,class:"guide"},g);
-    el("line",{x1:drawRect.x+drawRect.w*0.33,y1:drawRect.y+drawRect.h/2,x2:drawRect.x+drawRect.w*0.67,y2:drawRect.y+drawRect.h/2,stroke:"#777","stroke-width":0.8,"stroke-dasharray":"4 4","stroke-opacity":0.35,class:"guide"},g);
-    [...(f.presetMode==="3" ? [mzones.latA,mzones.topFull,mzones.baseFull] : [mzones.latA,mzones.latB,mzones.topFull,mzones.baseFull])].forEach(z=>{
-      const s=getSafeRect(z,f);
-      el("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"none",stroke:"#2f9e44","stroke-dasharray":"4 4","stroke-width":1,class:"guide"},g);
-    });
+  // ── LOGO PARCEIRO / SECUNDÁRIO ──
+  let sectionBottomY=logoY+ldH+30;
+  if(f.incluiFooterLogo&&footerLogoData){
+    const pRatio=footerLogoNaturalW/Math.max(1,footerLogoNaturalH);
+    const pRealW=f.footerLogoW;
+    const pRealH=Math.round(pRealW/pRatio);
+    const PMW=170, PMH=120;
+    let pW=PMW, pH=pW/pRatio;
+    if(pH>PMH){pH=PMH; pW=pH*pRatio;}
+    const pX=cx-pW/2, pY=sectionBottomY+22;
+
+    // Cota largura parceiro
+    const pdwY=sectionBottomY+2;
+    el("line",{x1:pX,y1:pdwY,x2:pX+pW,y2:pdwY,stroke:"#111","stroke-width":0.8},svg);
+    el("line",{x1:pX,y1:pdwY-5,x2:pX,y2:pdwY+5,stroke:"#111","stroke-width":0.8},svg);
+    el("line",{x1:pX+pW,y1:pdwY-5,x2:pX+pW,y2:pdwY+5,stroke:"#111","stroke-width":0.8},svg);
+    const pdwEl=el("text",{x:cx,y:pdwY-4,"font-size":9,"text-anchor":"middle",fill:"#111"},svg);
+    pdwEl.textContent=`${pRealW}mm`;
+
+    // Cota altura parceiro
+    const pdhX=pX-16;
+    el("line",{x1:pdhX,y1:pY,x2:pdhX,y2:pY+pH,stroke:"#111","stroke-width":0.8},svg);
+    el("line",{x1:pdhX-5,y1:pY,x2:pdhX+5,y2:pY,stroke:"#111","stroke-width":0.8},svg);
+    el("line",{x1:pdhX-5,y1:pY+pH,x2:pdhX+5,y2:pY+pH,stroke:"#111","stroke-width":0.8},svg);
+    const pdhEl=el("text",{x:pdhX-8,y:pY+pH/2,"font-size":9,"text-anchor":"middle",fill:"#111",transform:`rotate(-90 ${pdhX-8} ${pY+pH/2})`},svg);
+    pdhEl.textContent=`${pRealH}mm`;
+
+    el("image",{href:footerLogoData,x:pX,y:pY,width:pW,height:pH,preserveAspectRatio:"xMidYMid meet"},svg);
+    sectionBottomY=pY+pH+10;
   }
 
-  // dimensions
-  text(scaleGroup,`${f.h.toFixed(2).replace(".",",")}m`,drawRect.x-54,drawRect.y+drawRect.h/2,12,"400","middle","#444",-90);
-  el("line",{x1:drawRect.x-40,y1:drawRect.y,x2:drawRect.x-40,y2:drawRect.y+drawRect.h,stroke:"#777","stroke-width":1},scaleGroup);
-  el("line",{x1:drawRect.x-50,y1:drawRect.y,x2:drawRect.x-30,y2:drawRect.y,stroke:"#777","stroke-width":1},scaleGroup);
-  el("line",{x1:drawRect.x-50,y1:drawRect.y+drawRect.h,x2:drawRect.x-30,y2:drawRect.y+drawRect.h,stroke:"#777","stroke-width":1},scaleGroup);
+  // Observações (se houver)
+  if(f.obs&&f.obs.trim()){
+    const obsEl=el("text",{x:cx,y:sectionBottomY+18,"font-size":9,"text-anchor":"middle",fill:"#555"},svg);
+    obsEl.textContent=`Obs.: ${f.obs.substring(0,120)}`;
+  }
 
-  text(scaleGroup,`${f.material} ${f.w.toFixed(2).replace(".",",")}m`,drawRect.x+drawRect.w/2,drawRect.y+drawRect.h+26,12,"400","middle","#444");
-  el("line",{x1:drawRect.x,y1:drawRect.y+drawRect.h+12,x2:drawRect.x+drawRect.w,y2:drawRect.y+drawRect.h+12,stroke:"#777","stroke-width":1},scaleGroup);
-  el("line",{x1:drawRect.x,y1:drawRect.y+drawRect.h+2,x2:drawRect.x,y2:drawRect.y+drawRect.h+22,stroke:"#777","stroke-width":1},scaleGroup);
-  el("line",{x1:drawRect.x+drawRect.w,y1:drawRect.y+drawRect.h+2,x2:drawRect.x+drawRect.w,y2:drawRect.y+drawRect.h+22,stroke:"#777","stroke-width":1},scaleGroup);
+  // ── RODAPÉ ──
+  const footerY=H-118;
+  el("line",{x1:SW+12,y1:footerY,x2:W-16,y2:footerY,stroke:"#e0e0e0","stroke-width":0.8},svg);
 
-  logos.forEach(l=>{
-    const z = mzones[l.zone] || mzones.topFull;
-    drawOneLogo(g,l,z,f,l.id===selectedLogoId);
+  // Bloco de aprovação (rodapé direito)
+  const apX=310, apY=footerY+8;
+  const a1=el("text",{x:apX,y:apY,"font-size":9.5,"font-weight":"700","text-anchor":"start",fill:"#444"},svg);
+  a1.textContent=`Logotipo: ${f.logotipoDesc}`;
+  const a2=el("text",{x:apX,y:apY+14,"font-size":9.5,"text-anchor":"start",fill:"#444"},svg);
+  a2.textContent=`Data: ${f.data} | Revisão: ${f.revisao}`;
+  const a3=el("text",{x:apX,y:apY+34,"font-size":9.5,"font-weight":"700","text-anchor":"start",fill:"#222","font-style":"italic"},svg);
+  a3.textContent="APROVAÇÃO DO CLIENTE:";
+  [["Resp.:",apY+50],["Empresa:",apY+65],["Data:",apY+80],["Assi.:",apY+95]].forEach(([lbl,ly])=>{
+    const ln=el("text",{x:apX,y:ly,"font-size":9,"text-anchor":"start",fill:"#444"},svg);
+    ln.textContent=`${lbl} _______________________________`;
   });
-  drawPartnerLogoOnCroqui(g, mzones, f);
-
-
-  // Bottom notes and approval blocks like model
-  text(svg,"ATENÇÃO:",70,692,11,"700","start","#333");
-  const noteLines=[
-    "Nosso padrão consiste em:",
-    "- Argolas conforme croqui aprovado: marcações no contorno, 50cm nas laterais e 33cm no topo e base",
-    "- Medidas padrão do logo: 1200 x até 580mm, iguais nas laterais e no topo/base por padrão",
-    "- É possível ajustar cada posição individualmente, se necessário.",
-    "- Logo em 1 cor com aplicação automática suave (ou cor manual).",
-    "Para lonas com características diferentes do apresentado acima, consulte comercial"
-  ];
-  let ny=707; noteLines.forEach(l=>{text(svg,l,70,ny,9.5,"400","start","#333"); ny+=13;});
-
-  text(svg,`Logotipo: ${f.logotipoDesc}`,885,688,10,"700","start","#555");
-  text(svg,`Cliente: ${f.cliente}`,885,701,10,"700","start","#555");
-  text(svg,`Data: ${f.data} | Revisão: ${f.revisao}`,885,714,10,"700","start","#555");
-  text(svg,"APROVAÇÃO DO CLIENTE:",885,734,9,"700","start","#555");
-  text(svg,"Resp.: __________________________________",885,750,9,"400","start","#555");
-  text(svg,"Empresa: _______________________________",885,766,9,"400","start","#555");
-  text(svg,"Data: _________________________________",885,782,9,"400","start","#555");
 
   if(updateList) refreshLogoList();
 }
@@ -1275,6 +1316,7 @@ function renderMockup(){
 function renderAll(updateList=true){
   calcInfo();
   renderCroqui(updateList);
+  renderMockup();
 }
 function svgPoint(evt){
   const svg=$("sheet"), pt=svg.createSVGPoint();

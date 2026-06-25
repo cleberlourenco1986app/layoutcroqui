@@ -1,0 +1,98 @@
+:root{--vinho:#7b0000;--azul:#0d4d63;--bg:#efefef}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#111}
+header{background:var(--vinho);color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:22px}
+header .sub{font-size:12px;opacity:.92;margin-top:4px}
+main{display:grid;grid-template-columns:440px 1fr;gap:16px;padding:16px}
+.panel,.preview{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.panel{padding:14px;max-height:calc(100vh - 95px);overflow:auto}
+.preview{padding:12px;overflow:auto}
+.panel h2{font-size:16px;color:var(--azul);margin:16px 0 8px;border-bottom:1px solid #ddd;padding-bottom:5px}
+label{display:block;font-size:12px;font-weight:700;margin-top:9px}
+input,select,textarea{width:100%;padding:8px;border:1px solid #bbb;border-radius:7px;background:#fff;font-size:13px}
+textarea{min-height:68px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.btns,.btns3{display:grid;gap:8px;margin-top:12px}
+.btns{grid-template-columns:1fr 1fr}
+.btns3{grid-template-columns:1fr 1fr 1fr}
+button{background:#111;color:#fff;border:0;padding:10px;border-radius:8px;font-weight:700;cursor:pointer}
+button.secondary{background:#555}
+button.warn{background:#9a0000}
+.logo-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.logo-card{border:1px solid #ddd;border-radius:8px;padding:8px;background:#fafafa}
+.logo-card.active{border:2px solid var(--vinho);background:#fff}
+.hint,.note{font-size:12px;color:#666;line-height:1.35}
+.badge{display:inline-block;background:#eee;border:1px solid #ccc;border-radius:999px;padding:5px 9px;font-size:12px;margin:0 8px 8px 0}
+.warnbox{background:#fff4d8;border:1px solid #e0c66c;border-radius:8px;padding:8px;font-size:12px;margin-top:8px}
+#sheet,#mockup{background:#fff;border:1px solid #ddd;display:block}
+#sheet{width:595px;height:842px}
+#mockup{width:595px;height:842px;margin-top:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.drag{cursor:move}
+.checkline{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
+.checkline input{width:auto}
+.variation-wrap{margin-top:16px}
+.variation-label{font-size:13px;color:#444;margin-bottom:6px}
+.lona-var-svg{background:#fff;border:1px solid #ddd;display:block;width:595px;height:842px}
+.variation-item{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.variation-item .var-num{font-size:12px;font-weight:700;min-width:40px;color:#555;white-space:nowrap}
+.variation-item .var-cor-sel{flex:1}
+.variation-item .var-logo-sel{flex:1}
+.variation-item .var-rm{width:auto;padding:5px 10px;font-size:12px}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  :root{--print-w:209.5mm;--print-h:296.5mm}
+  html,body{width:210mm;margin:0;padding:0;background:#fff;overflow:visible}
+  header,.panel,.toolbar,.badge{display:none}
+  main{display:block;width:210mm;padding:0;margin:0}
+  .preview{display:block;width:210mm;box-shadow:none;border-radius:0;padding:0;margin:0;overflow:visible;background:#fff}
+  /* Página 1 — sem break-after (evita página em branco dupla) */
+  #sheet{
+    display:block;border:0;
+    width:var(--print-w);height:var(--print-h);
+    margin:0;
+    page-break-after:always;
+    break-after:page;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+  /* Página 2 */
+  #mockupWrap{
+    display:block;
+    margin:0 !important;padding:0 !important;
+    page-break-before:auto;
+    break-before:auto;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+  #mockupWrap b{display:none !important;margin:0 !important}
+  #mockup{
+    display:block;border:0;
+    width:var(--print-w);height:var(--print-h);
+    margin:0;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+  #lonaExtrasWrap:empty{display:none}
+  /* Páginas extras (variações) */
+  .variation-wrap{
+    display:block;
+    margin:0 !important;
+    padding:0 !important;
+    page-break-before:always;
+    break-before:page;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+  .variation-label{display:none}
+  .lona-var-svg{
+    display:block;border:0;
+    width:var(--print-w);height:var(--print-h);
+    margin:0;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+  svg .guide,svg .selectedBox{display:none !important}
+}

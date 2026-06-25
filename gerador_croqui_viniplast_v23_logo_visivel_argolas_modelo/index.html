@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Croqui Viniplast</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>Gerador Automático de Croqui - Viniplast</h1>
+  <div class="sub">Logo escolhido com medida · Croqui na lona conforme modelo aprovado</div>
+</header>
+
+<main>
+<section class="panel">
+  <h2>1. Dados do material</h2>
+  <div class="row">
+    <div>
+      <label>Comprimento do material (m)</label>
+      <input id="largura" type="number" step="0.01" value="7.00">
+    </div>
+    <div>
+      <label>Largura total do material (m)</label>
+      <input id="altura" type="number" step="0.01" value="5.50">
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Cor da lona</label>
+      <select id="corLona" onchange="onCorLonaChange()">
+        <option value="PT">PT - preta</option>
+        <option value="AZ">AZ - azul</option>
+        <option value="VD">VD - verde</option>
+        <option value="VM">VM - vermelha</option>
+        <option value="BR">BR - branca</option>
+        <option value="AM">AM - amarela</option>
+        <option value="CZ">CZ - cinza</option>
+        <option value="LJ">LJ - laranja</option>
+      </select>
+    </div>
+    <div>
+      <label>Material</label>
+      <select id="material" onchange="aplicarMaterial()">
+        <option>Cargolight</option>
+        <option>SuperCargo</option>
+        <option>Sollar Acqua</option>
+        <option>Linha Sollar</option>
+        <option>G320 e K370</option>
+        <option>SuperForte</option>
+        <option>Outro / Especial</option>
+      </select>
+    </div>
+  </div>
+  <label>Acabamento</label>
+  <select id="acabamento" onchange="aplicarAcabamento()">
+    <option value="argolas">Bainha costurada + argolas</option>
+    <option value="ilhoses">Bainha soldada + ilhoses PVC</option>
+    <option value="especial">Especial / manual</option>
+  </select>
+  <div class="row">
+    <div>
+      <label>Distância lateral (cm)</label>
+      <input id="distLateral" type="number" step="1" value="50">
+    </div>
+    <div>
+      <label>Distância topo (cm)</label>
+      <input id="distTopo" type="number" step="1" value="33">
+    </div>
+  </div>
+
+  <h2>2. Regras da carroceria / área útil</h2>
+  <div class="row3">
+    <div>
+      <label>Largura da carroceria / topo (m)</label>
+      <input id="topWidth" type="number" step="0.01" value="2.50">
+    </div>
+    <div>
+      <label>Margem obrigatória (m)</label>
+      <input id="logoMargin" type="number" step="0.01" value="0.15">
+    </div>
+    <div>
+      <label>Preset</label>
+      <select id="presetMode" onchange="gerarPreset()">
+        <option value="3">3 logos (1 lateral + 1 topo + 1 base)</option>
+        <option value="4">4 logos (1 lateral + topo + base + topo espelhado)</option>
+      </select>
+    </div>
+  </div>
+  <div class="warnbox" id="areaInfo">A área útil será calculada automaticamente.</div>
+
+  <h2>3. Logo do cliente</h2>
+  <label>Carregar logo / arte do cliente (imagem ou PDF)</label>
+  <input id="logoFile" type="file" accept="image/*,.pdf,application/pdf" onchange="carregarLogo(event)">
+  <div class="row3">
+    <div>
+      <label>Modo</label>
+      <select id="logoModo" onchange="processLogo()">
+        <option value="mono">Converter para 1 cor (padrão)</option>
+        <option value="cutout">Recortar fundo (preservar cores)</option>
+        <option value="original">Usar imagem original</option>
+        <option value="placeholder">Só marcação</option>
+      </select>
+    </div>
+    <div>
+      <label>Limiar 1 cor</label>
+      <input id="threshold" type="range" min="20" max="240" value="150" oninput="processLogo(); processFooterLogo()">
+    </div>
+    <div>
+      <label>Cor de aplicação</label>
+      <select id="logoColorMode" onchange="processLogo()">
+        <option value="auto">Automática suave</option>
+        <option value="white">Branca</option>
+        <option value="black">Grafite</option>
+        <option value="custom">Cor personalizada</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Cor personalizada do logo</label>
+      <input id="logoCustomColor" type="color" value="#1f2937" oninput="processLogo()">
+    </div>
+    <div>
+      <label>Aplicar mesmo tamanho por padrão</label>
+      <select id="sameSizeDefault">
+        <option value="sim" selected>Sim</option>
+        <option value="nao">Não</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Largura real padrão (100%) (mm)</label>
+      <input id="logoW" type="number" value="1200" oninput="syncDefaultLogoSize('w')">
+    </div>
+    <div>
+      <label>Altura real padrão (100%) (mm)</label>
+      <div class="hint">Ao editar largura ou altura, a outra medida é ajustada proporcionalmente.</div>
+      <input id="logoH" type="number" value="580" oninput="syncDefaultLogoSize('h')">
+    </div>
+  </div>
+  <div class="btns3">
+    <button type="button" onclick="gerarPreset()">Gerar preset</button>
+    <button type="button" class="secondary" onclick="aplicarPosicaoModelo()">Aplicar posição do modelo</button>
+    <button type="button" class="warn" onclick="clearLogos()">Limpar</button>
+  </div>
+  <div class="btns3" style="margin-top:8px">
+    <button type="button" class="secondary" onclick="addLogo()">+ Logo</button>
+    <button type="button" class="secondary" onclick="renderAll()">Atualizar preview</button>
+    <button type="button" class="secondary" onclick="processLogo()">Reprocessar logo</button>
+    <button type="button" class="secondary" onclick="uniformizarTamanhos()">Padronizar tamanhos</button>
+  </div>
+  <label class="checkline">
+    <input id="showGuides" type="checkbox" checked onchange="renderAll()"> Mostrar linhas de controle na tela
+  </label>
+  <p class="hint">Aceita imagem e PDF. O sistema recorta o fundo e gera versão 1 cor para aplicação. No PDF via impressão, as linhas de controle são ocultadas automaticamente.</p>
+
+  <div class="logo-list" id="logoList"></div>
+
+  <div id="editLogoBox" style="display:none">
+    <h2>4. Logo selecionado</h2>
+    <div class="row">
+      <div>
+        <label>Zona</label>
+        <select id="selZone" onchange="updateSelectedFromInputs()">
+          <option value="latA">Lateral A</option>
+          <option value="topFull">Topo</option>
+          <option value="baseFull">Base</option>
+          <option value="topoA">Topo A (extra)</option>
+          <option value="topoB">Topo B (extra)</option>
+          <option value="latB">Lateral B</option>
+        </select>
+      </div>
+      <div>
+        <label>Nome</label>
+        <input id="selNome" oninput="updateSelectedFromInputs()">
+      </div>
+    </div>
+    <div class="row3">
+      <div>
+        <label>X (%)</label>
+        <input id="selX" type="number" min="0" max="100" step="0.5" onchange="updateSelectedFromInputs()">
+      </div>
+      <div>
+        <label>Y (%)</label>
+        <input id="selY" type="number" min="0" max="100" step="0.5" onchange="updateSelectedFromInputs()">
+      </div>
+      <div>
+        <label>Ajuste proporcional (%)</label>
+        <div class="hint">100% = medida real informada abaixo</div>
+        <input id="selScale" type="number" min="5" max="150" step="1" onchange="updateSelectedFromInputs()">
+      </div>
+    </div>
+    <div class="row3">
+      <div>
+        <label>Rotação</label>
+        <select id="selRotation" onchange="updateSelectedFromInputs()">
+          <option value="0">0°</option>
+          <option value="180">180°</option>
+          <option value="90">90°</option>
+          <option value="270">270°</option>
+        </select>
+      </div>
+      <div>
+        <label>Âncora vertical</label>
+        <select id="selAnchor" onchange="updateSelectedFromInputs()">
+          <option value="bottom">Base a 15 cm da borda</option>
+          <option value="center">Centralizado</option>
+          <option value="top">Topo a 15 cm da borda</option>
+        </select>
+      </div>
+      <div>
+        <label>Vincular Topo A/B?</label>
+        <select id="linkTopos">
+          <option value="nao">Não</option>
+          <option value="sim">Sim</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Aplicar tamanho em todos?</label>
+        <select id="applyAllSizes" onchange="renderAll(false)">
+          <option value="sim" selected>Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+      <div>
+        <label>Dica</label>
+        <div class="hint" style="padding-top:10px">Por padrão os logos ficam com o mesmo tamanho. Alterar largura ou ajuste proporcional atualiza todos quando esta opção estiver em Sim.</div>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Largura real (100%) (mm)</label>
+        <input id="selMaxW" type="number" onchange="syncSelectedLogoSize('w'); updateSelectedFromInputs()">
+      </div>
+      <div>
+        <label>Altura real (100%) (mm)</label>
+        <div class="hint">Ao editar largura ou altura, a outra medida é ajustada proporcionalmente.</div>
+        <input id="selMaxH" type="number" onchange="syncSelectedLogoSize('h'); updateSelectedFromInputs()">
+      </div>
+    </div>
+    <div class="btns3">
+      <button type="button" onclick="centralizarLogo()">Centralizar</button>
+      <button type="button" class="secondary" onclick="duplicarLogo()">Duplicar</button>
+      <button type="button" class="warn" onclick="removerLogo()">Excluir</button>
+    </div>
+  </div>
+
+  <h2>5. Logo parceiro / adicional (opcional)</h2>
+  <div class="row3">
+    <div>
+      <label>Incluir na lona?</label>
+      <select id="incluiFooterLogo">
+        <option value="nao" selected>Não</option>
+        <option value="sim">Sim</option>
+      </select>
+    </div>
+    <div>
+      <label>Modo</label>
+      <select id="footerLogoModo" onchange="processFooterLogo()">
+        <option value="mono">Converter para 1 cor (padrão)</option>
+        <option value="cutout">Recortar fundo (preservar cores)</option>
+        <option value="original">Usar imagem original</option>
+        <option value="placeholder">Só marcação</option>
+      </select>
+    </div>
+    <div>
+      <label>Carregar logo parceiro (imagem ou PDF)</label>
+      <input id="footerLogoFile" type="file" accept="image/*,.pdf,application/pdf" onchange="carregarLogoRodape(event)">
+    </div>
+  </div>
+  <div class="row3">
+    <div>
+      <label>Cor de aplicação</label>
+      <select id="footerLogoColorMode" onchange="processFooterLogo()">
+        <option value="auto">Automática suave</option>
+        <option value="white">Branca</option>
+        <option value="black">Grafite</option>
+        <option value="custom">Cor personalizada</option>
+      </select>
+    </div>
+    <div>
+      <label>Cor personalizada</label>
+      <input id="footerLogoCustomColor" type="color" value="#1f2937" oninput="processFooterLogo()">
+    </div>
+    <div>
+      <label>Distância à direita do logo (mm)</label>
+      <input id="footerLogoGap" type="number" value="1500" step="10">
+    </div>
+  </div>
+  <div class="row3">
+    <div>
+      <label>Largura real (100%) (mm)</label>
+      <input id="footerLogoW" type="number" value="320" oninput="syncFooterLogoSize('w'); renderAll(false)">
+    </div>
+    <div>
+      <label>Altura real (100%) (mm)</label>
+      <input id="footerLogoH" type="number" value="160" oninput="syncFooterLogoSize('h'); renderAll(false)">
+    </div>
+    <div>
+      <label>Ajuste fino X/Y (mm)</label>
+      <div class="row">
+        <input id="footerLogoOffsetX" type="number" value="0" title="X">
+        <input id="footerLogoOffsetY" type="number" value="0" title="Y">
+      </div>
+    </div>
+  </div>
+
+  <h2>6. Variações de cor (páginas extras)</h2>
+  <p class="hint">Adicione versões do croqui em outras cores. Cada cor gera uma nova página no PDF, sem alterar as páginas existentes.</p>
+  <div id="variationList"></div>
+  <div class="btns" style="margin-top:8px">
+    <button type="button" class="secondary" onclick="addLonaVariation()">+ Adicionar cor extra</button>
+    <span></span>
+  </div>
+
+  <h2>7. Dados finais</h2>
+  <div class="row">
+    <div>
+      <label>Código do layout</label>
+      <input id="codigoLayout" value="CÓD.: 000000 - CLIENTE">
+    </div>
+    <div>
+      <label>Revisão</label>
+      <input id="revisao" value="00">
+    </div>
+  </div>
+  <label>Logotipo / descrição</label>
+  <input id="logotipoDesc" value="Nome do cliente">
+  <label>Nome do cliente</label>
+  <input id="cliente" value="Nome do cliente">
+  <div class="row">
+    <div>
+      <label>Data</label>
+      <input id="data" type="date">
+    </div>
+    <div>
+      <label>Aprovação</label>
+      <input id="aprovacao" value="">
+    </div>
+  </div>
+  <label>Observações especiais</label>
+  <textarea id="obs" placeholder="Ex.: posicionamento especial, recorte, cor fora do padrão, etc."></textarea>
+
+  <div class="btns" style="grid-template-columns:1fr 1fr 1fr 1fr">
+    <button type="button" onclick="renderAll()">Atualizar</button>
+    <button type="button" class="secondary" onclick="window.print()">Imprimir / PDF</button>
+    <button type="button" class="secondary" onclick="downloadPNG()">PNG Pág. 1</button>
+    <button type="button" class="secondary" onclick="downloadLonaPNG()">PNG Croqui</button>
+  </div>
+</section>
+
+<section class="preview">
+  <div class="toolbar">
+    <span class="badge">Arraste os logos dentro da área útil</span>
+    <span class="badge" id="statusLogo">Nenhuma imagem carregada</span>
+  </div>
+  <svg id="sheet" viewBox="0 0 595 842" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="mockupWrap" style="margin-top:16px">
+    <b style="font-size:13px;color:#444;display:block;margin-bottom:6px">2ª Página — Croqui na Lona</b>
+    <svg id="mockup" viewBox="0 0 595 842" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div id="lonaExtrasWrap"></div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/form.js"></script>
+<script src="js/logo-process.js"></script>
+<script src="js/logo-manager.js"></script>
+<script src="js/draw-helpers.js"></script>
+<script src="js/drag.js"></script>
+<script src="js/render-croqui.js"></script>
+<script src="js/render-lona.js"></script>
+<script src="js/lona-variations.js"></script>
+<script src="js/export.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
