@@ -16,10 +16,14 @@ const PARTNER_COLOR_OPTIONS = [
 
 // ── logo principal ──────────────────────────────────────────────────────────
 
+const ACABAMENTO_OPTIONS = [
+  ["argolas","Argolas"],["ilhoses","Ilhoses"],["especial","Especial"]
+];
+
 function getVariationLogoData(v){
   if(!uploadedImageData || $("logoModo")?.value==="placeholder") return null;
   if(v.logoColor==="white") return processedImageDataWhite || processedImageData;
-  if(v.logoColor==="black") return processedImageDataPage1 || processedImageData;
+  if(v.logoColor==="black") return processedImageDataBlack || processedImageDataPage1 || processedImageData;
   if(v.logoColor==="custom") return v.logoDataUrl || processedImageData;
   return processedImageData; // "auto"
 }
@@ -44,6 +48,7 @@ function addLonaVariation(){
   const cor = $("corLona")?.value || "PT";
   lonaVariations.push({
     id, cor,
+    acabamento:$("acabamento")?.value||"argolas",
     logoColor:"auto", logoCustomColor:"#ffffff", logoDataUrl:null,
     logoX:null, logoY:null,
     partnerLogoColor:"auto", partnerCustomColor:"#ffffff", partnerLogoDataUrl:null
@@ -94,7 +99,9 @@ function renderOneVariation(id){
         v.logoY != null ? {y: v.logoY} : {}))
     : null;
 
-  renderLona(svgEl, v.cor, getVariationLogoData(v), logosOverride, getVariationPartnerLogoData(v));
+  renderLona(svgEl, v.cor, getVariationLogoData(v), logosOverride, getVariationPartnerLogoData(v), {
+    form:{acabamento:v.acabamento||$("acabamento")?.value||"argolas"}
+  });
 }
 
 function renderVariations(){
@@ -107,6 +114,14 @@ function onVariationCorChange(id, cor){
   const v = lonaVariations.find(v=>v.id===id);
   if(!v) return;
   v.cor = cor;
+  renderOneVariation(id);
+  refreshVariationList();
+}
+
+function onVariationAcabamentoChange(id, acabamento){
+  const v = lonaVariations.find(v=>v.id===id);
+  if(!v) return;
+  v.acabamento = acabamento;
   renderOneVariation(id);
   refreshVariationList();
 }
@@ -186,6 +201,8 @@ function refreshVariationList(){
       `<option value="${val}"${(v.logoColor||"auto")===val?" selected":""}>${lbl}</option>`).join("");
     const partnerOpts = PARTNER_COLOR_OPTIONS.map(([val,lbl])=>
       `<option value="${val}"${(v.partnerLogoColor||"auto")===val?" selected":""}>${lbl}</option>`).join("");
+    const acabamentoOpts = ACABAMENTO_OPTIONS.map(([val,lbl])=>
+      `<option value="${val}"${(v.acabamento||"argolas")===val?" selected":""}>${lbl}</option>`).join("");
     const isCustomLogo    = (v.logoColor||"auto")==="custom";
     const isCustomPartner = (v.partnerLogoColor||"auto")==="custom";
 
@@ -195,6 +212,7 @@ function refreshVariationList(){
       `<div class="var-main-row">` +
         `<span class="var-num">Pág.${3+i}</span>` +
         `<select class="var-cor-sel" title="Cor da lona" onchange="onVariationCorChange(${v.id},this.value)">${corOpts}</select>` +
+        `<select class="var-acab-sel" title="Acabamento" onchange="onVariationAcabamentoChange(${v.id},this.value)">${acabamentoOpts}</select>` +
         `<select class="var-logo-sel" title="Cor do logo" onchange="onVariationLogoColorChange(${v.id},this.value)">${logoOpts}</select>` +
         `<input type="color" class="var-custom-color" title="Cor personalizada do logo"` +
           ` value="${v.logoCustomColor||'#ffffff'}" style="display:${isCustomLogo?'inline-block':'none'}"` +
@@ -221,7 +239,7 @@ function refreshVariationList(){
     if(lbl){
       const posInfo=(v.logoX!=null||v.logoY!=null)?` | X:${v.logoX??'-'} Y:${v.logoY??'-'}`:'';
       lbl.querySelector("b").textContent =
-        `Pág. ${3+i} — Lona: ${v.cor} | Logo: ${v.logoColor||"auto"} | Parceiro: ${v.partnerLogoColor||"auto"}${posInfo}`;
+        `Pág. ${3+i} — Lona: ${v.cor} | Acab.: ${v.acabamento||"argolas"} | Logo: ${v.logoColor||"auto"} | Parceiro: ${v.partnerLogoColor||"auto"}${posInfo}`;
     }
   });
 }

@@ -3,7 +3,75 @@
 // Eixo horizontal = altura do material (f.h); eixo vertical = comprimento (f.w)
 
 // kForce — fator pré-calculado (opcional; se omitido, cada logo calcula seu próprio k)
-function drawLonaLogoZone(g, rect, logoList, f, ink, sc, ldUrl, kForce){
+function lonaPct(value,fallback=50){
+  const n=Number(value);
+  return Number.isFinite(n)?n:fallback;
+}
+
+function getLonaLayout(f){
+  const W=595,H=842;
+  const latH=(f.h-f.topWidth)/2;
+  const availX=52, availY=55, availW=W-availX-18, availH=H-availY-22;
+  const sc=Math.min(availW/Math.max(0.01,f.h), availH/Math.max(0.01,f.w));
+  const tW=f.h*sc;
+  const tH=f.w*sc;
+  const tX=availX+(availW-tW)/2;
+  const tY=availY+(availH-tH)/2;
+  const latHpx=latH*sc;
+  const topHpx=f.topWidth*sc;
+  const zoneLatA={ x:tX,               y:tY, w:latHpx, h:tH };
+  const zoneTopo= { x:tX+latHpx,       y:tY, w:topHpx, h:tH };
+  const zoneLatB={ x:tX+latHpx+topHpx, y:tY, w:latHpx, h:tH };
+  const zones={latA:zoneLatA,topFull:zoneTopo,topoA:zoneTopo,topoB:zoneTopo,baseFull:zoneLatB,latB:zoneLatB};
+  return {W,H,latH,sc,tX,tY,tW,tH,latHpx,topHpx,zoneLatA,zoneTopo,zoneLatB,zones};
+}
+
+function getLonaZoneForLogo(logo, f){
+  const layout=getLonaLayout(f);
+  return layout.zones[logo.zone]||layout.zoneTopo;
+}
+
+function getLonaLogoMetrics(rect, logo, f, sc, kForce){
+  const padPx=Math.max(2,(f.logoMargin||0.15)*sc);
+  const safeW=Math.max(10,rect.w-2*padPx);
+  const safeH=Math.max(10,rect.h-2*padPx);
+  const scaleFactor=(logo.scale||100)/100;
+  const rot=((logo.rotation||0)%360+360)%360;
+  const swap=rot===90||rot===270;
+  let dW=(logo.maxW||1200)/1000*sc*scaleFactor;
+  let dH=(logo.maxH||580)/1000*sc*scaleFactor;
+  const effW=swap?dH:dW, effH=swap?dW:dH;
+  const k=kForce!==undefined ? kForce : 1;
+  dW*=k; dH*=k;
+  const visW=swap?dH:dW;
+  const visH=swap?dW:dH;
+  const safeLeft=rect.x+padPx;
+  const safeRight=rect.x+rect.w-padPx;
+  const safeTop=rect.y+padPx;
+  const safeBottom=rect.y+rect.h-padPx;
+  const minCX=safeLeft+visW/2;
+  const maxCX=safeRight-visW/2;
+  const xPct=lonaPct(logo.x);
+  const cx=maxCX>minCX
+    ? Math.max(minCX,Math.min(maxCX,minCX+(xPct/100)*(maxCX-minCX)))
+    : (safeLeft+safeRight)/2;
+  const anchor=logo.anchor||"bottom";
+  const minCY=safeTop+visH/2;
+  const maxCY=safeBottom-visH/2;
+  let cy;
+  if(anchor==="bottom") cy=rect.y+rect.h-padPx-visH/2;
+  else if(anchor==="top") cy=rect.y+padPx+visH/2;
+  else {
+    const yPct=lonaPct(logo.y);
+    cy=maxCY>minCY
+      ? Math.max(minCY,Math.min(maxCY,minCY+(yPct/100)*(maxCY-minCY)))
+      : (safeTop+safeBottom)/2;
+  }
+  cy=Math.max(minCY,Math.min(maxCY,cy));
+  return {padPx,safeW,safeH,scaleFactor,rot,swap,dW,dH,effW,effH,k,visW,visH,safeLeft,safeRight,safeTop,safeBottom,minCX,maxCX,minCY,maxCY,cx,cy};
+}
+
+function drawLonaLogoZone(g, rect, logoList, f, ink, sc, ldUrl, kForce, enableDrag=false){
   const padPx=Math.max(2,(f.logoMargin||0.15)*sc);
   const safeW=Math.max(10,rect.w-2*padPx);
   const safeH=Math.max(10,rect.h-2*padPx);
@@ -45,12 +113,21 @@ function drawLonaLogoZone(g, rect, logoList, f, ink, sc, ldUrl, kForce){
       : (safeTop+safeBottom)/2;
     }
     cy=Math.max(minCY, Math.min(maxCY, cy));
-    const inner=el("g",{transform:`translate(${cx} ${cy}) rotate(${rot}) translate(${-dW/2} ${-dH/2})`},g);
+    const grp=el("g",{class:enableDrag?"drag lona-drag":"lona-logo","data-id":logo.id},g);
+    if(enableDrag&&typeof startLonaDrag==="function"){
+      grp.addEventListener("mousedown",startLonaDrag);
+      grp.addEventListener("touchstart",startLonaDragTouch,{passive:false});
+      grp.onclick=(e)=>{ selectedLogoId=logo.id; e.stopPropagation(); renderAll(); };
+    }
+    const inner=el("g",{transform:`translate(${cx} ${cy}) rotate(${rot}) translate(${-dW/2} ${-dH/2})`},grp);
     if($("logoModo").value!=="placeholder"&&ldUrl){
       el("image",{href:ldUrl,x:0,y:0,width:dW,height:dH,preserveAspectRatio:"none"},inner);
     } else {
       el("rect",{x:0,y:0,width:dW,height:dH,rx:5,fill:"none",stroke:ink,"stroke-width":2.5,"stroke-dasharray":"7 5"},inner);
       text(inner,"LOGO",dW/2,dH/2+5,Math.min(dW,dH)*0.18,"700","middle",ink);
+    }
+    if(enableDrag&&selectedLogoId===logo.id&&showGuides()){
+      el("rect",{x:cx-visW/2-5,y:cy-visH/2-5,width:visW+10,height:visH+10,fill:"none",stroke:"#d10000","stroke-width":1.6,"stroke-dasharray":"5 4",class:"selectedBox"},grp);
     }
   });
 }
@@ -209,8 +286,8 @@ function drawLonaFinish(g, rect, f, ink, sc, seamPx){
   });
 }
 
-function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoDataUrl){
-  const f=form();
+function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoDataUrl, options){
+  const f=Object.assign({}, form(), (options&&options.form)||{});
   const svg=svgEl||$("mockup"); if(!svg) return;
   svg.innerHTML="";
   const W=595,H=842;
@@ -218,6 +295,7 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
   const ldUrl=logoDataUrl||processedImageData;
   const logosEff=logosOverride||logos;
   const partnerData=(partnerLogoDataUrl!==undefined)?partnerLogoDataUrl:footerLogoData;
+  const enableLogoDrag=(!svgEl||svg.id==="mockup")&&!logosOverride;
 
   // Fundo branco
   el("rect",{x:0,y:0,width:W,height:H,fill:"#ffffff"},svg);
@@ -263,9 +341,9 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
   const logosLatB=logosEff.filter(l=>l.zone==="latB"||l.zone==="baseFull");
 
   // k=1 sempre — logo aparece no tamanho exato especificado (maxW × maxH), sem redução por zona
-  if(logosLatA.length) drawLonaLogoZone(svg,zoneLatA,logosLatA,f,ink,sc,ldUrl);
-  if(logosTopo.length) drawLonaLogoZone(svg,zoneTopo,logosTopo,f,ink,sc,ldUrl);
-  if(logosLatB.length) drawLonaLogoZone(svg,zoneLatB,logosLatB,f,ink,sc,ldUrl);
+  if(logosLatA.length) drawLonaLogoZone(svg,zoneLatA,logosLatA,f,ink,sc,ldUrl,undefined,enableLogoDrag);
+  if(logosTopo.length) drawLonaLogoZone(svg,zoneTopo,logosTopo,f,ink,sc,ldUrl,undefined,enableLogoDrag);
+  if(logosLatB.length) drawLonaLogoZone(svg,zoneLatB,logosLatB,f,ink,sc,ldUrl,undefined,enableLogoDrag);
 
   // Logo parceiro: apenas em latA e latB/base (NÃO no topo)
   if(f.incluiFooterLogo){

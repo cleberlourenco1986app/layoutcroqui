@@ -3,6 +3,7 @@ let uploadedImageData = null;
 let processedImageData = null;
 let processedImageDataPage1 = null;
 let processedImageDataWhite = null;
+let processedImageDataBlack = null;
 let logoNaturalW = 1000;
 let logoNaturalH = 500;
 let footerLogoSourceData = null;

@@ -131,6 +131,20 @@
   </div>
   <div class="row">
     <div>
+      <label>Cor do logo no layout para aprovação</label>
+      <select id="approvalLogoColorMode" onchange="processLogo()">
+        <option value="black" selected>Grafite/preto</option>
+        <option value="white">Branca</option>
+        <option value="custom">Cor personalizada</option>
+      </select>
+    </div>
+    <div>
+      <label>Cor personalizada da aprovação</label>
+      <input id="approvalLogoCustomColor" type="color" value="#1f2937" oninput="processLogo()">
+    </div>
+  </div>
+  <div class="row">
+    <div>
       <label>Largura real padrão (100%) (mm)</label>
       <input id="logoW" type="number" value="1200" oninput="syncDefaultLogoSize('w')">
     </div>

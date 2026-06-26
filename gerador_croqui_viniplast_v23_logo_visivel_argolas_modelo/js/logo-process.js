@@ -285,8 +285,22 @@ function monoProcessCanvas(imgEl, inkHex){
 }
 
 function processLogo(){
-  if(!uploadedImageData){ processedImageData=null; processedImageDataPage1=null; processedImageDataWhite=null; renderAll(false); return; }
-  if($("logoModo").value==="placeholder"){ processedImageData=null; processedImageDataPage1=null; processedImageDataWhite=null; renderAll(false); return; }
+  if(!uploadedImageData){
+    processedImageData=null;
+    processedImageDataPage1=null;
+    processedImageDataWhite=null;
+    processedImageDataBlack=null;
+    renderAll(false);
+    return;
+  }
+  if($("logoModo").value==="placeholder"){
+    processedImageData=null;
+    processedImageDataPage1=null;
+    processedImageDataWhite=null;
+    processedImageDataBlack=null;
+    renderAll(false);
+    return;
+  }
 
   const modo=$("logoModo").value;
   const img=new Image();
@@ -294,8 +308,7 @@ function processLogo(){
     logoNaturalW=img.naturalWidth||img.width||1000;
     logoNaturalH=img.naturalHeight||img.height||500;
 
-    // 3 variantes em paralelo (p1=grafite, white, p2=modo do usuário)
-    let pending=3;
+    let pending=4;
     function done(){
       if(--pending<=0){
         syncDefaultLogoSize("w");
@@ -304,9 +317,13 @@ function processLogo(){
       }
     }
 
-    // Pág 1: autoCutout + mono grafite escuro
-    autoCutoutFromDataUrl(uploadedImageData,{mode:"mono",ink:hexToRgb("#1f2937"),max:1400},(res)=>{
+    autoCutoutFromDataUrl(uploadedImageData,{mode:"mono",ink:hexToRgb(getApprovalLogoInk()),max:1400},(res)=>{
       processedImageDataPage1=res.dataUrl;
+      done();
+    });
+
+    autoCutoutFromDataUrl(uploadedImageData,{mode:"mono",ink:hexToRgb("#1f2937"),max:1400},(res)=>{
+      processedImageDataBlack=res.dataUrl;
       done();
     });
 

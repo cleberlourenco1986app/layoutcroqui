@@ -11,6 +11,8 @@ function form(){
     logoMargin:parseFloat($("logoMargin").value||0.15),
     logoW:parseFloat($("logoW").value||1200),
     logoH:parseFloat($("logoH").value||580),
+    approvalLogoColorMode:$("approvalLogoColorMode")?.value||"black",
+    approvalLogoCustomColor:$("approvalLogoCustomColor")?.value||"#1f2937",
     presetMode:$("presetMode").value,
     incluiFooterLogo:$("incluiFooterLogo").value==="sim",
     footerLogoW:parseFloat($("footerLogoW").value||320),

@@ -43,6 +43,13 @@ function getInk(){
   return autoInk($("corLona").value);
 }
 
+function getApprovalLogoInk(){
+  const mode=$("approvalLogoColorMode")?.value||"black";
+  if(mode==="white") return "#ffffff";
+  if(mode==="custom") return $("approvalLogoCustomColor")?.value||"#1f2937";
+  return "#1f2937";
+}
+
 function showGuides(){ return $("showGuides").checked; }
 
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }

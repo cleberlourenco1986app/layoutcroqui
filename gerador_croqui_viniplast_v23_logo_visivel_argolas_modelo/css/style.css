@@ -41,7 +41,7 @@ button.warn{background:#9a0000}
 .var-pos-row{display:flex;gap:6px;align-items:center;padding-left:2px}
 .var-pos-row label{font-size:11px;color:#777;font-weight:400;margin:0;width:auto}
 .variation-item .var-num{font-size:12px;font-weight:700;min-width:36px;color:#555;white-space:nowrap}
-.variation-item .var-cor-sel,.variation-item .var-logo-sel,.variation-item .var-partner-sel{flex:1;min-width:80px}
+.variation-item .var-cor-sel,.variation-item .var-logo-sel,.variation-item .var-partner-sel,.variation-item .var-acab-sel{flex:1;min-width:80px}
 .variation-item .var-rm{width:auto;padding:5px 10px;font-size:12px;flex:none}
 .variation-item .var-pos-x,.variation-item .var-pos-y{width:58px;flex:none;padding:5px 4px;font-size:12px;text-align:center}
 .variation-item .var-custom-color,.variation-item .var-partner-color{width:38px;flex:none;padding:2px;height:30px;border-radius:5px;cursor:pointer}

@@ -82,9 +82,10 @@ function drawOneLogo(g, logo, zone, f, selected=false){
   grp.onclick=(e)=>{ selectedLogoId=logo.id; e.stopPropagation(); renderAll(); };
   const inner=el("g",{transform:`translate(${cx} ${cy}) rotate(${logo.rotation}) translate(${-size.w/2} ${-size.h/2})`},grp);
   const srcP1=processedImageDataPage1||processedImageData;
+  const approvalInk=getApprovalLogoInk();
   if($("logoModo").value==="placeholder"||!srcP1){
-    el("rect",{x:0,y:0,width:size.w,height:size.h,rx:7,fill:"none",stroke:"#1f2937","stroke-width":3,"stroke-dasharray":"8 6"},inner);
-    text(inner,"LOGO",size.w/2,size.h/2,17,"700","middle","#1f2937");
+    el("rect",{x:0,y:0,width:size.w,height:size.h,rx:7,fill:"none",stroke:approvalInk,"stroke-width":3,"stroke-dasharray":"8 6"},inner);
+    text(inner,"LOGO",size.w/2,size.h/2,17,"700","middle",approvalInk);
   } else {
     el("image",{href:srcP1,x:0,y:0,width:size.w,height:size.h,preserveAspectRatio:"xMidYMid meet"},inner);
   }

@@ -48,13 +48,14 @@ function renderCroqui(updateList=true){
   const dhEl=el("text",{x:dhX-9,y:logoY+ldH/2,"font-size":10,"text-anchor":"middle",fill:"#111",transform:`rotate(-90 ${dhX-9} ${logoY+ldH/2})`},svg);
   dhEl.textContent=`${realH}mm`;
 
-  // Imagem do logo — página 1 sempre grafite escuro (processedImageDataPage1)
+  // Imagem do logo da pagina de aprovacao.
+  const approvalInk=getApprovalLogoInk();
   const srcCroqui=processedImageDataPage1||processedImageData;
   if($("logoModo").value!=="placeholder"&&srcCroqui){
     el("image",{href:srcCroqui,x:logoX,y:logoY,width:ldW,height:ldH,preserveAspectRatio:"xMidYMid meet"},svg);
   } else {
-    el("rect",{x:logoX,y:logoY,width:ldW,height:ldH,rx:4,fill:"none",stroke:"#ccc","stroke-width":1.4,"stroke-dasharray":"6 4"},svg);
-    const plEl=el("text",{x:cx,y:logoY+ldH/2+7,"font-size":20,"font-weight":"700","text-anchor":"middle",fill:"#ccc"},svg);
+    el("rect",{x:logoX,y:logoY,width:ldW,height:ldH,rx:4,fill:"none",stroke:approvalInk,"stroke-width":1.4,"stroke-dasharray":"6 4",opacity:0.75},svg);
+    const plEl=el("text",{x:cx,y:logoY+ldH/2+7,"font-size":20,"font-weight":"700","text-anchor":"middle",fill:approvalInk,opacity:0.75},svg);
     plEl.textContent="LOGO";
   }
 
