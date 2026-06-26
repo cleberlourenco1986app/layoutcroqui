@@ -132,6 +132,50 @@ function drawLonaLogoZone(g, rect, logoList, f, ink, sc, ldUrl, kForce, enableDr
   });
 }
 
+function drawLonaLogoEdgeDistance(g, layout, logosEff, f, sc, ink){
+  if(!logosEff.length) return;
+  const logo=logosEff.find(l=>l.id===selectedLogoId)||logosEff[0];
+  const zone=layout.zones[logo.zone]||layout.zoneTopo;
+  const m=getLonaLogoMetrics(zone,logo,f,sc);
+  const box={x1:m.cx-m.visW/2,y1:m.cy-m.visH/2,x2:m.cx+m.visW/2,y2:m.cy+m.visH/2};
+  const candidates=[
+    {side:"left",dist:box.x1-layout.tX},
+    {side:"right",dist:layout.tX+layout.tW-box.x2},
+    {side:"top",dist:box.y1-layout.tY},
+    {side:"bottom",dist:layout.tY+layout.tH-box.y2}
+  ].filter(c=>Number.isFinite(c.dist)&&c.dist>1);
+  if(!candidates.length) return;
+  candidates.sort((a,b)=>a.dist-b.dist);
+  const pick=candidates[0];
+  if(pick.dist<2) return;
+  const mm=Math.round((pick.dist/sc)*1000);
+  const stroke=ink||"#3f3f3f";
+  const sw=0.85;
+  const cls="logo-edge-distance";
+  function dimText(str,x,y,rotate=null){
+    text(g,str,x,y,6.8,"700","middle",stroke,rotate,cls);
+  }
+  if(pick.side==="left"||pick.side==="right"){
+    const y=Math.max(layout.tY+8,Math.min(layout.tY+layout.tH-8,m.cy));
+    const x1=pick.side==="left"?layout.tX:box.x2;
+    const x2=pick.side==="left"?box.x1:layout.tX+layout.tW;
+    const a=Math.min(x1,x2),b=Math.max(x1,x2);
+    el("line",{x1:a,y1:y,x2:b,y2:y,stroke,"stroke-width":sw,class:cls},g);
+    el("line",{x1:a,y1:y-4,x2:a,y2:y+4,stroke,"stroke-width":sw,class:cls},g);
+    el("line",{x1:b,y1:y-4,x2:b,y2:y+4,stroke,"stroke-width":sw,class:cls},g);
+    dimText(`${mm}mm`,(a+b)/2,y-4);
+    return;
+  }
+  const x=Math.max(layout.tX+8,Math.min(layout.tX+layout.tW-8,m.cx));
+  const y1=pick.side==="top"?layout.tY:box.y2;
+  const y2=pick.side==="top"?box.y1:layout.tY+layout.tH;
+  const a=Math.min(y1,y2),b=Math.max(y1,y2);
+  el("line",{x1:x,y1:a,x2:x,y2:b,stroke,"stroke-width":sw,class:cls},g);
+  el("line",{x1:x-4,y1:a,x2:x+4,y2:a,stroke,"stroke-width":sw,class:cls},g);
+  el("line",{x1:x-4,y1:b,x2:x+4,y2:b,stroke,"stroke-width":sw,class:cls},g);
+  dimText(`${mm}mm`,x-5,(a+b)/2,-90);
+}
+
 // Logo parceiro posicionado à DIREITA do logo principal ao longo do comprimento
 // (= abaixo no SVG rotacionado), no mesmo eixo X (mesma distância da borda).
 // Aparece apenas em latA e latB/baseFull — NÃO no topo.
@@ -316,6 +360,7 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
   const zoneLatA={ x:tX,               y:tY, w:latHpx, h:tH };
   const zoneTopo= { x:tX+latHpx,       y:tY, w:topHpx, h:tH };
   const zoneLatB={ x:tX+latHpx+topHpx, y:tY, w:latHpx, h:tH };
+  const layout={tX,tY,tW,tH,latH,sc,zoneLatA,zoneTopo,zoneLatB,zones:{latA:zoneLatA,topFull:zoneTopo,topoA:zoneTopo,topoB:zoneTopo,baseFull:zoneLatB,latB:zoneLatB}};
 
   const lonaCor=codeColor(corEff);
   const ink=autoInk(corEff);
@@ -350,6 +395,7 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
     if(logosLatA.length) drawPartnerLogoBase(svg,zoneLatA,logosLatA,f,sc,partnerData,ink);
     if(logosLatB.length) drawPartnerLogoBase(svg,zoneLatB,logosLatB,f,sc,partnerData,ink);
   }
+  drawLonaLogoEdgeDistance(svg,layout,logosEff,f,sc,ink);
 
   if(!logosEff.length){
     [{r:zoneLatA,lbl:"LAT. A"},{r:zoneTopo,lbl:"TOPO"},{r:zoneLatB,lbl:"BASE"}].forEach(({r,lbl})=>{
