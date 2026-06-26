@@ -288,7 +288,7 @@
     </div>
     <div>
       <label>Distância à direita do logo (mm)</label>
-      <input id="footerLogoGap" type="number" value="1500" step="10">
+      <input id="footerLogoDistBase" type="number" value="1500" step="100">
     </div>
   </div>
   <div class="row3">
@@ -301,11 +301,8 @@
       <input id="footerLogoH" type="number" value="160" oninput="syncFooterLogoSize('h'); renderAll(false)">
     </div>
     <div>
-      <label>Ajuste fino X/Y (mm)</label>
-      <div class="row">
-        <input id="footerLogoOffsetX" type="number" value="0" title="X">
-        <input id="footerLogoOffsetY" type="number" value="0" title="Y">
-      </div>
+      <label>Ajuste X horizontal (mm)</label>
+      <input id="footerLogoOffsetX" type="number" value="0">
     </div>
   </div>
 

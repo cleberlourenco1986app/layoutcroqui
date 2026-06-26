@@ -51,6 +51,9 @@ function gerarPreset(){
   const w=parseFloat($("logoW").value||1200), h=parseFloat($("logoH").value||580);
   logos.forEach(l=>{ l.maxW=w; l.maxH=h; l.scale=100; l.x=50; l.y=50; });
   if(logos.find(l=>l.zone==="topFull")) logos.find(l=>l.zone==="topFull").y=0;
+  // Base do logo a 150mm da borda exterior: latA→x=0 (borda esq), baseFull→x=100 (borda dir)
+  const _la=logos.find(l=>l.zone==="latA"); if(_la) _la.x=0;
+  const _bf=logos.find(l=>l.zone==="baseFull"); if(_bf) _bf.x=100;
   selectedLogoId=logos[0]?.id||null;
   renderAll();
 }
@@ -63,17 +66,17 @@ function aplicarPosicaoModelo(){
   logos.forEach(l=>{
     if(sameSize){ l.maxW=baseW; l.maxH=baseH; l.scale=100; }
     l.x=50; l.y=50;
-    if(l.zone==="latA"){ l.name="Logo - Lateral A"; l.rotation=90;  l.anchor="center"; l.y=50; l.role="latA"; }
-    else if(l.zone==="latB"){ l.name="Logo - Lateral B"; l.rotation=270; l.anchor="center"; l.y=50; }
+    if(l.zone==="latA"){ l.name="Logo - Lateral A"; l.rotation=90;  l.anchor="center"; l.y=50; l.x=0;   l.role="latA"; }
+    else if(l.zone==="latB"){ l.name="Logo - Lateral B"; l.rotation=270; l.anchor="center"; l.y=50; l.x=100; }
     else if(l.zone==="topFull"&&l.role==="topMirror"){ l.name="Logo - Topo espelhado"; l.rotation=0; l.anchor="bottom"; l.y=50; }
     else if(l.zone==="topFull"){ l.name="Logo - Topo"; l.rotation=180; l.anchor="top"; l.y=0; l.role="top"; }
-    else if(l.zone==="baseFull"){ l.name="Logo - Base"; l.rotation=270; l.anchor="center"; l.y=50; l.role="base"; }
+    else if(l.zone==="baseFull"){ l.name="Logo - Base"; l.rotation=270; l.anchor="center"; l.y=50; l.x=100; l.role="base"; }
   });
   if(mode==="3"){
     const order=["latA","top","base"];
     logos=order.map(r=>logos.find(l=>(l.role||l.zone)===r)).filter(Boolean);
     if(!logos.find(l=>l.zone==="baseFull")){
-      const nb=newLogo("baseFull","Logo - Base",270,"center","base"); logos.push(nb);
+      const nb=newLogo("baseFull","Logo - Base",270,"center","base"); nb.x=100; logos.push(nb);
     }
   } else {
     const order=["latA","top","base","topMirror"];

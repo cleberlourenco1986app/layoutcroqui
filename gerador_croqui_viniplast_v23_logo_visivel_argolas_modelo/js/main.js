@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   ["largura","altura","topWidth","distLateral","distTopo","logoMargin",
    "logoW","logoH","codigoLayout","revisao","logotipoDesc","cliente",
    "data","aprovacao","obs","incluiFooterLogo","footerLogoW","footerLogoH",
-   "footerLogoGap","footerLogoOffsetX","footerLogoOffsetY"
+   "footerLogoDistBase","footerLogoOffsetX"
   ].forEach(id=>{
     const e=document.getElementById(id);
     if(!e) return;
