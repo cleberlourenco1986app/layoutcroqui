@@ -49,6 +49,7 @@ function addLonaVariation(){
   lonaVariations.push({
     id, cor,
     acabamento:$("acabamento")?.value||"argolas",
+    lonaW:null, lonaH:null,
     logoColor:"auto", logoCustomColor:"#ffffff", logoDataUrl:null,
     logoX:null, logoY:null,
     partnerLogoColor:"auto", partnerCustomColor:"#ffffff", partnerLogoDataUrl:null
@@ -99,8 +100,14 @@ function renderOneVariation(id){
         v.logoY != null ? {y: v.logoY} : {}))
     : null;
 
+  const formOverride = {
+    acabamento:v.acabamento||$("acabamento")?.value||"argolas"
+  };
+  if(v.lonaW != null) formOverride.w = v.lonaW;
+  if(v.lonaH != null) formOverride.h = v.lonaH;
+
   renderLona(svgEl, v.cor, getVariationLogoData(v), logosOverride, getVariationPartnerLogoData(v), {
-    form:{acabamento:v.acabamento||$("acabamento")?.value||"argolas"}
+    form:formOverride
   });
 }
 
@@ -122,6 +129,28 @@ function onVariationAcabamentoChange(id, acabamento){
   const v = lonaVariations.find(v=>v.id===id);
   if(!v) return;
   v.acabamento = acabamento;
+  renderOneVariation(id);
+  refreshVariationList();
+}
+
+function parseVariationSizeValue(val){
+  if(val===''||val==null) return null;
+  const n = parseFloat(String(val).replace(",","."));
+  return Number.isFinite(n) && n>0 ? n : null;
+}
+
+function onVariationLonaWChange(id, val){
+  const v = lonaVariations.find(v=>v.id===id);
+  if(!v) return;
+  v.lonaW = parseVariationSizeValue(val);
+  renderOneVariation(id);
+  refreshVariationList();
+}
+
+function onVariationLonaHChange(id, val){
+  const v = lonaVariations.find(v=>v.id===id);
+  if(!v) return;
+  v.lonaH = parseVariationSizeValue(val);
   renderOneVariation(id);
   refreshVariationList();
 }
@@ -223,6 +252,15 @@ function refreshVariationList(){
           ` oninput="onVariationPartnerCustomColorChange(${v.id},this.value)">` +
         `<button type="button" class="warn var-rm" onclick="removeLonaVariation(${v.id})">✕</button>` +
       `</div>` +
+      `<div class="var-size-row">` +
+        `<label>Lona tam.:</label>` +
+        `<input type="number" class="var-size-w" placeholder="Comp. m" title="Comprimento da lona desta pagina extra"` +
+          ` min="0.01" step="0.01" value="${v.lonaW!=null?v.lonaW:''}"` +
+          ` onchange="onVariationLonaWChange(${v.id},this.value)">` +
+        `<input type="number" class="var-size-h" placeholder="Larg. m" title="Largura total da lona desta pagina extra"` +
+          ` min="0.01" step="0.01" value="${v.lonaH!=null?v.lonaH:''}"` +
+          ` onchange="onVariationLonaHChange(${v.id},this.value)">` +
+      `</div>` +
       `<div class="var-pos-row">` +
         `<label>Logo pos.:</label>` +
         `<input type="number" class="var-pos-x" placeholder="X%" title="Posição X do logo (0-100%)"` +
@@ -237,7 +275,9 @@ function refreshVariationList(){
     // Atualiza label no SVG
     const lbl = document.getElementById("varlabel_"+v.id);
     if(lbl){
-      const posInfo=(v.logoX!=null||v.logoY!=null)?` | X:${v.logoX??'-'} Y:${v.logoY??'-'}`:'';
+      let posInfo=(v.logoX!=null||v.logoY!=null)?` | X:${v.logoX??'-'} Y:${v.logoY??'-'}`:'';
+      const sizeInfo=(v.lonaW!=null||v.lonaH!=null)?` | Tam.: ${v.lonaW??form().w} x ${v.lonaH??form().h} m`:'';
+      posInfo=sizeInfo+posInfo;
       lbl.querySelector("b").textContent =
         `Pág. ${3+i} — Lona: ${v.cor} | Acab.: ${v.acabamento||"argolas"} | Logo: ${v.logoColor||"auto"} | Parceiro: ${v.partnerLogoColor||"auto"}${posInfo}`;
     }
