@@ -134,7 +134,10 @@ function drawLonaLogoZone(g, rect, logoList, f, ink, sc, ldUrl, kForce, enableDr
 
 function drawLonaLogoEdgeDistance(g, layout, logosEff, f, sc, ink){
   if(!logosEff.length) return;
-  const logo=logosEff.find(l=>l.id===selectedLogoId)||logosEff[0];
+  const logo=logosEff.find(l=>l.id===selectedLogoId)
+    ||logosEff.find(l=>l.role==="latA")
+    ||logosEff.find(l=>l.zone==="latA")
+    ||logosEff[0];
   const zone=layout.zones[logo.zone]||layout.zoneTopo;
   const m=getLonaLogoMetrics(zone,logo,f,sc);
   const box={x1:m.cx-m.visW/2,y1:m.cy-m.visH/2,x2:m.cx+m.visW/2,y2:m.cy+m.visH/2};
