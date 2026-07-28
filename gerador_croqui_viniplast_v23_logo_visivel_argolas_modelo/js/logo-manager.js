@@ -3,11 +3,13 @@ function zoneLabel(z){
 }
 
 function getMainRect(f){
-  const area={x:45,y:95,w:735,h:515};
-  const ratio=f.w/f.h;
-  let dw=area.w,dh=dw/ratio;
-  if(dh>area.h){ dh=area.h; dw=dh*ratio; }
-  return {x:area.x+(area.w-dw)/2,y:area.y+(area.h-dh)/2,w:dw,h:dh};
+  // Calcular área útil dinamicamente com base nas dimensões do material (consistente com render-lona)
+  const W=595, H=842;
+  const availX=52, availY=55, availW=W-availX-18, availH=H-availY-22;
+  const sc=Math.min(availW/Math.max(0.01,f.h), availH/Math.max(0.01,f.w));
+  const tW=f.h*sc; const tH=f.w*sc;
+  const tX=availX+(availW-tW)/2; const tY=availY+(availH-tH)/2;
+  return {x:tX,y:tY,w:tW,h:tH};
 }
 
 function getZones(rect, f){

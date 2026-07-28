@@ -94,8 +94,8 @@ function renderCroqui(updateList=true){
 
   // Observações
   if(f.obs&&f.obs.trim()){
-    const obsEl=el("text",{x:cx,y:sectionBottomY+18,"font-size":9,"text-anchor":"middle",fill:"#555"},svg);
-    obsEl.textContent=`Obs.: ${f.obs.substring(0,120)}`;
+    // Quebra de texto para manter observações dentro da página
+    wrapText(svg, `Obs.: ${f.obs}`, SW+12, sectionBottomY+6, W - SW - 28, 9, 12, "", "start", "#555");
   }
 
   // Rodapé

@@ -14,11 +14,11 @@ function text(parent, str, x, y, size=14, weight="400", anchor="start", fill="#1
   const t=el("text",a,parent); t.textContent=str; return t;
 }
 
-function wrapText(parent, str, x, y, maxW, size=12, lineH=16, cls=""){
+function wrapText(parent, str, x, y, maxW, size=12, lineH=16, cls="", anchor="start", fill="#111"){
   const words=(str||"").split(/\s+/); let line="", lines=[];
   words.forEach(w=>{ const test=line?line+" "+w:w; if(test.length*size*.55>maxW && line){lines.push(line); line=w;} else line=test; });
   if(line) lines.push(line);
-  lines.slice(0,10).forEach((l,i)=>text(parent,l,x,y+i*lineH,size,"400","start","#111",null,cls));
+  lines.slice(0,10).forEach((l,i)=>text(parent,l,x,y+i*lineH,size,"400",anchor,fill,null,cls));
 }
 
 function codeColor(code){
