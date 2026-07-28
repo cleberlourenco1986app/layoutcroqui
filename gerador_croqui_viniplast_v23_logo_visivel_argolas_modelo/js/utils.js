@@ -42,7 +42,9 @@ function renderFormattedText(parent, str, x, y, maxW, size=12, lineH=16, options
   function splitParagraph(p){
     // detecta bullets
     const isBullet = p.trim().startsWith("- ");
-    const content = isBullet ? p.trim().replace(/^-\s+/,"") : p;
+    const content = isBullet ? p.trim().replace(/^\-\s+/,"") : p;
+    // preservar parágrafos vazios (duas quebras -> linha em branco)
+    if(String(content).trim()==="") return [""];
     // Wrap similar to wrapText
     const words = (content||"").split(/\s+/);
     let line = "", lines = [];

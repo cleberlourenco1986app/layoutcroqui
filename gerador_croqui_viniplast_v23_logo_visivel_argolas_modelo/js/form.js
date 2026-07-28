@@ -62,8 +62,17 @@ function formatObs(cmd){
   const start=ta.selectionStart, end=ta.selectionEnd; const val=ta.value;
   if(cmd==='bold'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`**${sel}**`, start, end, 'end'); }
   else if(cmd==='italic'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`*${sel}*`, start, end, 'end'); }
-  else if(cmd==='bullet'){ const lineStart=val.lastIndexOf('\n', start-1)+1; ta.setRangeText('- ' + val.substring(lineStart, end), lineStart, end, 'end'); }
-  else if(cmd==='newline'){ ta.setRangeText('\n', start, end, 'end'); }
+  else if(cmd==='bullet'){
+    const lineStart = val.lastIndexOf('\n', start-1) + 1;
+    const block = val.substring(lineStart, end);
+    const lines = block.split(/\r?\n/);
+    const newLines = lines.map(l => l.trim().startsWith('- ') ? l : ('- ' + l));
+    ta.setRangeText(newLines.join('\n'), lineStart, end, 'end');
+  }
+  else if(cmd==='newline'){
+    // insert a paragraph break (two newlines) to represent an intentional empty line
+    ta.setRangeText('\n\n', start, end, 'end');
+  }
   ta.focus(); renderObsPreview(); renderAll();
 }
 
