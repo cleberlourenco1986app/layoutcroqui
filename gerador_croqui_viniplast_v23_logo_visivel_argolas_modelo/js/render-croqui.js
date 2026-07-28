@@ -87,10 +87,16 @@ function renderCroqui(updateList=true){
     sectionBottomY=pY+pH+10;
   }
 
-  // Observações
+  // Observações — renderizado com formatação básica (quebras, bullets, **negrito**, *itálico*)
   if(f.obs&&f.obs.trim()){
-    // Quebra de texto para manter observações dentro da página
-    wrapText(svg, `Obs.: ${f.obs}`, SW+12, sectionBottomY+6, W - SW - 28, 9, 12, "", "start", "#555");
+    const footerY=H-118; // mesma constante usada mais abaixo
+    const availH = Math.max(20, footerY - (sectionBottomY+6));
+    const lineH = 12;
+    const maxLines = Math.max(1, Math.floor(availH/lineH));
+    const obsX = SW+12;
+    const obsW = W - SW - 28;
+    const maxLinesOpt = (f.obsMode&&f.obsMode==="mostrarTudo") ? 1000 : maxLines;
+    renderFormattedText(svg, f.obs, obsX, sectionBottomY+6, obsW, 9, lineH, {anchor:"start", fill:"#555", maxLines: maxLinesOpt});
   }
 
   // Rodapé

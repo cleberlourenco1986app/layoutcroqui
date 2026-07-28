@@ -29,6 +29,82 @@ function wrapText(parent, str, x, y, maxW, size=12, lineH=16, cls="", anchor="st
   lines.slice(0,10).forEach((l,i)=>text(parent,l,x,y+i*lineH,size,"400",anchor,fill,null,cls));
 }
 
+// Renderiza texto com suporte a quebras manuais, bullets (- ) e formatação básica
+// Suporta **negrito** e *itálico* inline.
+function renderFormattedText(parent, str, x, y, maxW, size=12, lineH=16, options={}){
+  const anchor = options.anchor||"start";
+  const fill = options.fill||"#111";
+  const maxLines = options.maxLines||10;
+  if(!str) return;
+  // Cria elemento <text> com contorno usando helper text()
+  const txt = text(parent, "", x, y, size, "400", anchor, fill);
+  // limpar conteúdo (text já adicionou stroke/outline)
+  txt.textContent = "";
+
+  function splitParagraph(p){
+    // detecta bullets
+    const isBullet = p.trim().startsWith("- ");
+    const content = isBullet ? p.trim().replace(/^-\s+/,"") : p;
+    // Wrap similar to wrapText
+    const words = (content||"").split(/\s+/);
+    let line = "", lines = [];
+    words.forEach(w=>{ const test=line?line+" "+w:w; if(test.length*size*.55>maxW && line){lines.push(line); line=w;} else line=test; });
+    if(line) lines.push(line);
+    if(isBullet){ return lines.map((l,i)=> (i===0?"• "+l:"  "+l)); }
+    return lines;
+  }
+
+  function parseInlineParts(line){
+    const parts = [];
+    let rest = line;
+    const re = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)/g;
+    let match, lastIndex=0;
+    while((match=re.exec(rest)) !== null){
+      const idx = match.index;
+      if(idx>lastIndex){ parts.push({text: rest.substring(lastIndex, idx), weight:"400", style:"normal"}); }
+      if(match[2]) parts.push({text: match[2], weight:"700", style:"normal"});
+      else if(match[4]) parts.push({text: match[4], weight:"400", style:"italic"});
+      lastIndex = re.lastIndex;
+    }
+    if(lastIndex < rest.length){ parts.push({text: rest.substring(lastIndex), weight:"400", style:"normal"}); }
+    return parts.filter(p=>p.text!="");
+  }
+
+  const paragraphs = String(str).split(/\r?\n/);
+  let lineCount = 0;
+  for(const p of paragraphs){
+    const lines = splitParagraph(p);
+    for(const ln of lines){
+      if(lineCount+1>maxLines){
+        // append ellipsis to previous line if exists
+        const prev = txt.lastChild;
+        if(prev){
+          // find last child tspan within prev
+          const lastSpan = prev.lastChild || prev;
+          try{ lastSpan.textContent = String(lastSpan.textContent || "") + " ..."; }catch(e){}
+        } else {
+          const ell = document.createElementNS(NS, 'tspan'); ell.setAttribute('x', x); ell.setAttribute('dy', lineCount===0? '0' : String(lineH)); ell.textContent='...'; txt.appendChild(ell);
+        }
+        return;
+      }
+      const tspan = document.createElementNS(NS, 'tspan');
+      tspan.setAttribute('x', x);
+      tspan.setAttribute('dy', lineCount===0? '0' : String(lineH));
+      // build inline parts
+      const parts = parseInlineParts(ln);
+      parts.forEach(part=>{
+        const sp = document.createElementNS(NS, 'tspan');
+        if(part.weight) sp.setAttribute('font-weight', part.weight);
+        if(part.style && part.style!=='normal') sp.setAttribute('font-style', part.style);
+        sp.textContent = part.text;
+        tspan.appendChild(sp);
+      });
+      txt.appendChild(tspan);
+      lineCount++;
+    }
+  }
+}
+
 function codeColor(code){
   return {PT:"#111111",AZ:"#135aa3",VD:"#1d7a35",VM:"#b00000",BR:"#fafafa",AM:"#f0c400",CZ:"#9a9a9a",LJ:"#e87922"}[code]||"#ddd";
 }

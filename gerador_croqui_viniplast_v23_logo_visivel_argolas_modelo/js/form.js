@@ -25,7 +25,8 @@ function form(){
     cliente:$("cliente").value||"Nome do cliente",
     data:$("data").value||"__/__/____",
     aprovacao:$("aprovacao").value||"____________________",
-    obs:$("obs").value||""
+    obs:$("obs").value||"",
+    obsMode:$("obsMode")?.value||"restrito"
   };
 }
 
