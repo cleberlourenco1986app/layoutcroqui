@@ -354,7 +354,17 @@
     </div>
   </div>
   <label>Observações especiais</label>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+    <div class="obs-toolbar">
+      <button type="button" onclick="formatObs('bold')"><b>B</b></button>
+      <button type="button" onclick="formatObs('italic')"><i>I</i></button>
+      <button type="button" onclick="formatObs('bullet')">•</button>
+      <button type="button" onclick="formatObs('newline')">⏎</button>
+      <button type="button" onclick="toggleObsPreview()">Pré-visualizar</button>
+    </div>
+  </div>
   <textarea id="obs" placeholder="Ex.: posicionamento especial, recorte, cor fora do padrão, etc."></textarea>
+  <div id="obsPreview" style="display:none;border:1px solid #e0e0e0;padding:8px;margin-top:6px;background:#fafafa;max-height:220px;overflow:auto;font-size:13px;color:#222"></div>
   <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
     <label style="margin:0">Modo de exibição das observações:</label>
     <select id="obsMode" onchange="renderAll()">

@@ -55,3 +55,20 @@ function calcInfo(){
     ? `Laterais: usar COMPRIMENTO ${f.w.toFixed(2)} m x faixa útil ${safeLatH.toFixed(2)} m. Topo/base: usar LARGURA ${f.topWidth.toFixed(2)} m com recuo de 15 cm. Padrão atual: ${modo}.`
     : `Atenção: a largura total do material precisa ser maior que a largura da carroceria (${f.topWidth.toFixed(2)} m).`;
 }
+
+// Formatting helpers for the observations textarea
+function formatObs(cmd){
+  const ta=$("obs"); if(!ta) return;
+  const start=ta.selectionStart, end=ta.selectionEnd; const val=ta.value;
+  if(cmd==='bold'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`**${sel}**`, start, end, 'end'); }
+  else if(cmd==='italic'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`*${sel}*`, start, end, 'end'); }
+  else if(cmd==='bullet'){ const lineStart=val.lastIndexOf('\n', start-1)+1; ta.setRangeText('- ' + val.substring(lineStart, end), lineStart, end, 'end'); }
+  else if(cmd==='newline'){ ta.setRangeText('\n', start, end, 'end'); }
+  ta.focus(); renderObsPreview();
+}
+
+function toggleObsPreview(){ const p=$("obsPreview"); if(!p) return; p.style.display = p.style.display==='none' ? 'block' : 'none'; renderObsPreview(); }
+
+function renderObsPreview(){ const p=$("obsPreview"); const ta=$("obs"); if(!p||!ta) return; const html=escapeHtml(ta.value).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\*([^*]+)\*/g,'<i>$1</i>').replace(/^-\s+/gm,'• ').replace(/\n/g,'<br>'); p.innerHTML = html; }
+
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
