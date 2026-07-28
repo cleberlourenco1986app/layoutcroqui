@@ -88,7 +88,11 @@ function renderFormattedText(parent, str, x, y, maxW, size=12, lineH=16, options
       const txtLine = text(parent, "", x, yLine, size, "400", anchor, fill);
       lastTextEl = txtLine;
       const parts = parseInlineParts(ln);
-      if(parts.length===0){ txtLine.textContent = ""; }
+      if(parts.length===0){
+        const sp = document.createElementNS(NS, 'tspan');
+        sp.textContent = '\u00A0'; // non-breaking space to force an empty line render
+        txtLine.appendChild(sp);
+      }
       parts.forEach(part=>{
         const sp = document.createElementNS(NS, 'tspan');
         if(part.weight) sp.setAttribute('font-weight', part.weight);

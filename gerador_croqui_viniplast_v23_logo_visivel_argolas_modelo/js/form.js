@@ -59,7 +59,11 @@ function calcInfo(){
 // Formatting helpers for the observations textarea
 function formatObs(cmd){
   const ta=$("obs"); if(!ta) return;
-  const start=ta.selectionStart, end=ta.selectionEnd; const val=ta.value;
+  // usar seleção memorizada para evitar perda ao clicar nos botões
+  const selState = window._obsSel || {start: ta.selectionStart, end: ta.selectionEnd};
+  const start = (typeof selState.start === 'number') ? selState.start : 0;
+  const end = (typeof selState.end === 'number') ? selState.end : start;
+  const val = ta.value;
   if(cmd==='bold'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`**${sel}**`, start, end, 'end'); }
   else if(cmd==='italic'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`*${sel}*`, start, end, 'end'); }
   else if(cmd==='bullet'){
@@ -75,6 +79,16 @@ function formatObs(cmd){
   }
   ta.focus(); renderObsPreview(); renderAll();
 }
+
+// memorizar posição/seleção do textarea para que os botões funcionem após clique
+(function(){
+  const ta=$("obs"); if(!ta) return;
+  const updateSel = ()=> { try{ window._obsSel = {start: ta.selectionStart, end: ta.selectionEnd}; }catch(e){} };
+  ta.addEventListener('select', updateSel);
+  ta.addEventListener('keyup', updateSel);
+  ta.addEventListener('mouseup', updateSel);
+  ta.addEventListener('input', updateSel);
+})();
 
 function toggleObsPreview(){ const p=$("obsPreview"); if(!p) return; p.style.display = p.style.display==='none' ? 'block' : 'none'; renderObsPreview(); }
 
