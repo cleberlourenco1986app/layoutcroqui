@@ -64,7 +64,7 @@ function formatObs(cmd){
   else if(cmd==='italic'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`*${sel}*`, start, end, 'end'); }
   else if(cmd==='bullet'){ const lineStart=val.lastIndexOf('\n', start-1)+1; ta.setRangeText('- ' + val.substring(lineStart, end), lineStart, end, 'end'); }
   else if(cmd==='newline'){ ta.setRangeText('\n', start, end, 'end'); }
-  ta.focus(); renderObsPreview();
+  ta.focus(); renderObsPreview(); renderAll();
 }
 
 function toggleObsPreview(){ const p=$("obsPreview"); if(!p) return; p.style.display = p.style.display==='none' ? 'block' : 'none'; renderObsPreview(); }
