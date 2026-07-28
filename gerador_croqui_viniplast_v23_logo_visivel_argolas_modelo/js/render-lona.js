@@ -425,7 +425,10 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
   el("line",{x1:tX+latHpx,y1:cotaTopWY,x2:tX+latHpx+topHpx,y2:cotaTopWY,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:tX+latHpx,y1:cotaTopWY-4,x2:tX+latHpx,y2:cotaTopWY+4,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:tX+latHpx+topHpx,y1:cotaTopWY-4,x2:tX+latHpx+topHpx,y2:cotaTopWY+4,stroke:cotaStroke,"stroke-width":0.8},svg);
-  text(svg, `${f.topWidth.toFixed(2)} m`, tX+latHpx+topHpx/2, cotaTopWY-6, 7.5, "400", "middle", cotaStroke);
+  el("line",{x1:tX+latHpx,y1:cotaTopWY,x2:tX+latHpx+topHpx,y2:cotaTopWY,stroke:cotaStroke,"stroke-width":0.8,class:"cota-topwidth"},svg);
+  el("line",{x1:tX+latHpx,y1:cotaTopWY-4,x2:tX+latHpx,y2:cotaTopWY+4,stroke:cotaStroke,"stroke-width":0.8,class:"cota-topwidth"},svg);
+  el("line",{x1:tX+latHpx+topHpx,y1:cotaTopWY-4,x2:tX+latHpx+topHpx,y2:cotaTopWY+4,stroke:cotaStroke,"stroke-width":0.8,class:"cota-topwidth"},svg);
+  text(svg, `${f.topWidth.toFixed(2)} m`, tX+latHpx+topHpx/2, cotaTopWY-6, 7.5, "400", "middle", cotaStroke, null, "cota-topwidth");
 
   // Cota vertical: f.w metros (comprimento)
   const cotaLeftX=tX-18;
