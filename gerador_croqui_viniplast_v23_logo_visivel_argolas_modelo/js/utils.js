@@ -36,10 +36,8 @@ function renderFormattedText(parent, str, x, y, maxW, size=12, lineH=16, options
   const fill = options.fill||"#111";
   const maxLines = options.maxLines||10;
   if(!str) return;
-  // Cria elemento <text> com contorno usando helper text()
-  const txt = text(parent, "", x, y, size, "400", anchor, fill);
-  // limpar conteúdo (text já adicionou stroke/outline)
-  txt.textContent = "";
+  // iremos criar um elemento <text> separado para cada linha com posição absoluta (y),
+  // usando o helper text() para garantir contorno/stroke automático.
 
   function splitParagraph(p){
     // detecta bullets
@@ -72,34 +70,30 @@ function renderFormattedText(parent, str, x, y, maxW, size=12, lineH=16, options
 
   const paragraphs = String(str).split(/\r?\n/);
   let lineCount = 0;
+  let lastTextEl = null;
   for(const p of paragraphs){
     const lines = splitParagraph(p);
     for(const ln of lines){
-      if(lineCount+1>maxLines){
-        // append ellipsis to previous line if exists
-        const prev = txt.lastChild;
-        if(prev){
-          // find last child tspan within prev
-          const lastSpan = prev.lastChild || prev;
-          try{ lastSpan.textContent = String(lastSpan.textContent || "") + " ..."; }catch(e){}
-        } else {
-          const ell = document.createElementNS(NS, 'tspan'); ell.setAttribute('x', x); ell.setAttribute('dy', lineCount===0? '0' : String(lineH)); ell.textContent='...'; txt.appendChild(ell);
+      if(lineCount>=maxLines){
+        // append ellipsis to previous line's last tspan
+        if(lastTextEl){
+          const lastChild = lastTextEl.lastChild;
+          if(lastChild) lastChild.textContent = String(lastChild.textContent || "") + " ...";
         }
         return;
       }
-      const tspan = document.createElementNS(NS, 'tspan');
-      tspan.setAttribute('x', x);
-      tspan.setAttribute('dy', lineCount===0? '0' : String(lineH));
-      // build inline parts
+      const yLine = y + lineCount*lineH;
+      const txtLine = text(parent, "", x, yLine, size, "400", anchor, fill);
+      lastTextEl = txtLine;
       const parts = parseInlineParts(ln);
+      if(parts.length===0){ txtLine.textContent = ""; }
       parts.forEach(part=>{
         const sp = document.createElementNS(NS, 'tspan');
         if(part.weight) sp.setAttribute('font-weight', part.weight);
         if(part.style && part.style!=='normal') sp.setAttribute('font-style', part.style);
         sp.textContent = part.text;
-        tspan.appendChild(sp);
+        txtLine.appendChild(sp);
       });
-      txt.appendChild(tspan);
       lineCount++;
     }
   }
