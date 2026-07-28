@@ -1,7 +1,7 @@
 function exportCleanClone(svgEl){
   const clone=svgEl.cloneNode(true);
   // remover guias, box selecionada e cotas opcionais para exportação limpa
-  clone.querySelectorAll(".guide,.selectedBox,.cota-topwidth,.cota-fh").forEach(n=>n.remove());
+  clone.querySelectorAll(".guide,.selectedBox,.cota-topwidth").forEach(n=>n.remove());
   return clone;
 }
 
