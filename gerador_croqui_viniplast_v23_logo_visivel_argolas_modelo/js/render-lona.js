@@ -415,9 +415,9 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
 
   // Cota horizontal: f.h metros (largura total)
   const cotaTopY=tY-18;
-  el("line",{x1:tX,y1:cotaTopY,x2:tX+tW,y2:cotaTopY,stroke:cotaStroke,"stroke-width":0.8,class:"cota-fh-line"},svg);
-  el("line",{x1:tX,y1:cotaTopY-5,x2:tX,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8,class:"cota-fh-line"},svg);
-  el("line",{x1:tX+tW,y1:cotaTopY-5,x2:tX+tW,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8,class:"cota-fh-line"},svg);
+  el("line",{x1:tX,y1:cotaTopY,x2:tX+tW,y2:cotaTopY,stroke:cotaStroke,"stroke-width":0.8},svg);
+  el("line",{x1:tX,y1:cotaTopY-5,x2:tX,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8},svg);
+  el("line",{x1:tX+tW,y1:cotaTopY-5,x2:tX+tW,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8},svg);
   text(svg, `${f.h.toFixed(2)} m`, tX+tW/2, cotaTopY-6, 9, "700", "middle", cotaStroke);
 
   // Cota topWidth (acima, entre linhas divisórias)
