@@ -415,10 +415,10 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
 
   // Cota horizontal: f.h metros (largura total)
   const cotaTopY=tY-18;
-  el("line",{x1:tX,y1:cotaTopY,x2:tX+tW,y2:cotaTopY,stroke:cotaStroke,"stroke-width":0.8},svg);
-  el("line",{x1:tX,y1:cotaTopY-5,x2:tX,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8},svg);
-  el("line",{x1:tX+tW,y1:cotaTopY-5,x2:tX+tW,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8},svg);
-  text(svg, `${f.h.toFixed(2)} m`, tX+tW/2, cotaTopY-6, 9, "700", "middle", cotaStroke);
+  el("line",{x1:tX,y1:cotaTopY,x2:tX+tW,y2:cotaTopY,stroke:cotaStroke,"stroke-width":0.8,class:"cota-fh"},svg);
+  el("line",{x1:tX,y1:cotaTopY-5,x2:tX,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8,class:"cota-fh"},svg);
+  el("line",{x1:tX+tW,y1:cotaTopY-5,x2:tX+tW,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8,class:"cota-fh"},svg);
+  text(svg, `${f.h.toFixed(2)} m`, tX+tW/2, cotaTopY-6, 9, "700", "middle", cotaStroke, null, "cota-fh");
 
   // Cota topWidth (acima, entre linhas divisórias)
   const cotaTopWY=cotaTopY-16;
@@ -446,7 +446,8 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
     lb.textContent=txt;
   }
   zLabel(tX+latHpx/2,              tY+tH/2, `LAT. A — ${latH.toFixed(2)} m`);
-  zLabel(tX+latHpx+topHpx/2,       tY+tH/2, `TOPO — ${f.topWidth.toFixed(2)} m`);
+  // remover medida do topo — manter apenas rótulo "TOPO"
+  zLabel(tX+latHpx+topHpx/2,       tY+tH/2, `TOPO`);
   zLabel(tX+latHpx+topHpx+latHpx/2,tY+tH/2, `${labelRight} — ${latH.toFixed(2)} m`);
 
   // Info mínima no rodapé

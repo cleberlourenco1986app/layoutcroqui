@@ -102,4 +102,5 @@ button.warn{background:#9a0000}
   svg .guide,svg .selectedBox{display:none !important}
   svg .zone-label,svg .zone-mark{display:none !important}
   svg .cota-topwidth{display:none !important}
+  svg .cota-fh{display:none !important}
 }
