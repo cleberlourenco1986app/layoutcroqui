@@ -59,11 +59,10 @@ function calcInfo(){
 // Formatting helpers for the observations textarea
 function formatObs(cmd){
   const ta=$("obs"); if(!ta) return;
-  // usar seleção memorizada para evitar perda ao clicar nos botões
+  // restaurar seleção memorizada para evitar perda ao clicar nos botões
   const selState = window._obsSel || {start: ta.selectionStart, end: ta.selectionEnd};
-  const start = (typeof selState.start === 'number') ? selState.start : 0;
-  const end = (typeof selState.end === 'number') ? selState.end : start;
-  const val = ta.value;
+  try{ ta.focus(); ta.setSelectionRange(selState.start, selState.end); }catch(e){}
+  const start = ta.selectionStart, end = ta.selectionEnd; const val = ta.value;
   if(cmd==='bold'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`**${sel}**`, start, end, 'end'); }
   else if(cmd==='italic'){ const sel=val.substring(start,end)||'texto'; ta.setRangeText(`*${sel}*`, start, end, 'end'); }
   else if(cmd==='bullet'){

@@ -356,11 +356,11 @@
   <label>Observações especiais</label>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
     <div class="obs-toolbar">
-      <button type="button" onclick="formatObs('bold')"><b>B</b></button>
-      <button type="button" onclick="formatObs('italic')"><i>I</i></button>
-      <button type="button" onclick="formatObs('bullet')">•</button>
-      <button type="button" onclick="formatObs('newline')">⏎</button>
-      <button type="button" onclick="toggleObsPreview()">Pré-visualizar</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="formatObs('bold')"><b>B</b></button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="formatObs('italic')"><i>I</i></button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="formatObs('bullet')">•</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="formatObs('newline')">⏎</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="toggleObsPreview()">Pré-visualizar</button>
     </div>
   </div>
   <textarea id="obs" placeholder="Ex.: posicionamento especial, recorte, cor fora do padrão, etc." oninput="renderObsPreview()"></textarea>
