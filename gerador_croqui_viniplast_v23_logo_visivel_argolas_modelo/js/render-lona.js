@@ -418,24 +418,21 @@ function renderLona(svgEl, corOverride, logoDataUrl, logosOverride, partnerLogoD
   el("line",{x1:tX,y1:cotaTopY,x2:tX+tW,y2:cotaTopY,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:tX,y1:cotaTopY-5,x2:tX,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:tX+tW,y1:cotaTopY-5,x2:tX+tW,y2:cotaTopY+5,stroke:cotaStroke,"stroke-width":0.8},svg);
-  const cwEl=el("text",{x:tX+tW/2,y:cotaTopY-6,"font-size":9,"font-weight":"700","text-anchor":"middle",fill:cotaStroke,"font-family":fam},svg);
-  cwEl.textContent=`${f.h.toFixed(2)} m`;
+  text(svg, `${f.h.toFixed(2)} m`, tX+tW/2, cotaTopY-6, 9, "700", "middle", cotaStroke);
 
   // Cota topWidth (acima, entre linhas divisórias)
   const cotaTopWY=cotaTopY-16;
   el("line",{x1:tX+latHpx,y1:cotaTopWY,x2:tX+latHpx+topHpx,y2:cotaTopWY,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:tX+latHpx,y1:cotaTopWY-4,x2:tX+latHpx,y2:cotaTopWY+4,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:tX+latHpx+topHpx,y1:cotaTopWY-4,x2:tX+latHpx+topHpx,y2:cotaTopWY+4,stroke:cotaStroke,"stroke-width":0.8},svg);
-  const ctEl=el("text",{x:tX+latHpx+topHpx/2,y:cotaTopWY-6,"font-size":7.5,"text-anchor":"middle",fill:cotaStroke,"font-family":fam},svg);
-  ctEl.textContent=`${f.topWidth.toFixed(2)} m`;
+  text(svg, `${f.topWidth.toFixed(2)} m`, tX+latHpx+topHpx/2, cotaTopWY-6, 7.5, "400", "middle", cotaStroke);
 
   // Cota vertical: f.w metros (comprimento)
   const cotaLeftX=tX-18;
   el("line",{x1:cotaLeftX,y1:tY,x2:cotaLeftX,y2:tY+tH,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:cotaLeftX-5,y1:tY,x2:cotaLeftX+5,y2:tY,stroke:cotaStroke,"stroke-width":0.8},svg);
   el("line",{x1:cotaLeftX-5,y1:tY+tH,x2:cotaLeftX+5,y2:tY+tH,stroke:cotaStroke,"stroke-width":0.8},svg);
-  const chEl=el("text",{x:cotaLeftX-9,y:tY+tH/2,"font-size":9,"font-weight":"700","text-anchor":"middle",fill:cotaStroke,"font-family":fam,transform:`rotate(-90 ${cotaLeftX-9} ${tY+tH/2})`},svg);
-  chEl.textContent=`${f.w.toFixed(2)} m`;
+  text(svg, `${f.w.toFixed(2)} m`, cotaLeftX-9, tY+tH/2, 9, "700", "middle", cotaStroke, -90);
 
   // Labels de zona (texto rotacionado vertical — ocultos na impressão)
   const temLatB=logosLatB.some(l=>l.zone==="latB");

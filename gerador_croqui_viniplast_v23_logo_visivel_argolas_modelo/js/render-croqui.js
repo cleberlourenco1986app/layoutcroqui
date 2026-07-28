@@ -37,16 +37,14 @@ function renderCroqui(updateList=true){
   el("line",{x1:logoX,y1:dwY,x2:logoX+ldW,y2:dwY,stroke:"#111","stroke-width":0.9},svg);
   el("line",{x1:logoX,y1:dwY-6,x2:logoX,y2:dwY+6,stroke:"#111","stroke-width":0.9},svg);
   el("line",{x1:logoX+ldW,y1:dwY-6,x2:logoX+ldW,y2:dwY+6,stroke:"#111","stroke-width":0.9},svg);
-  const dwEl=el("text",{x:cx,y:dwY-5,"font-size":10,"text-anchor":"middle",fill:"#111"},svg);
-  dwEl.textContent=`${realW}mm`;
+  text(svg, `${realW}mm`, cx, dwY-5, 10, "400", "middle", "#111");
 
   // Cota altura
   const dhX=logoX-20;
   el("line",{x1:dhX,y1:logoY,x2:dhX,y2:logoY+ldH,stroke:"#111","stroke-width":0.9},svg);
   el("line",{x1:dhX-6,y1:logoY,x2:dhX+6,y2:logoY,stroke:"#111","stroke-width":0.9},svg);
   el("line",{x1:dhX-6,y1:logoY+ldH,x2:dhX+6,y2:logoY+ldH,stroke:"#111","stroke-width":0.9},svg);
-  const dhEl=el("text",{x:dhX-9,y:logoY+ldH/2,"font-size":10,"text-anchor":"middle",fill:"#111",transform:`rotate(-90 ${dhX-9} ${logoY+ldH/2})`},svg);
-  dhEl.textContent=`${realH}mm`;
+  text(svg, `${realH}mm`, dhX-9, logoY+ldH/2, 10, "400", "middle", "#111", -90);
 
   // Imagem do logo da pagina de aprovacao.
   const approvalInk=getApprovalLogoInk();
@@ -74,20 +72,17 @@ function renderCroqui(updateList=true){
     el("line",{x1:pX,y1:pdwY,x2:pX+pW,y2:pdwY,stroke:"#111","stroke-width":0.8},svg);
     el("line",{x1:pX,y1:pdwY-5,x2:pX,y2:pdwY+5,stroke:"#111","stroke-width":0.8},svg);
     el("line",{x1:pX+pW,y1:pdwY-5,x2:pX+pW,y2:pdwY+5,stroke:"#111","stroke-width":0.8},svg);
-    const pdwEl=el("text",{x:cx,y:pdwY-4,"font-size":9,"text-anchor":"middle",fill:"#111"},svg);
-    pdwEl.textContent=`${pRealW}mm`;
+    text(svg, `${pRealW}mm`, cx, pdwY-4, 9, "400", "middle", "#111");
     const pdhX=pX-16;
     el("line",{x1:pdhX,y1:pY,x2:pdhX,y2:pY+pH,stroke:"#111","stroke-width":0.8},svg);
     el("line",{x1:pdhX-5,y1:pY,x2:pdhX+5,y2:pY,stroke:"#111","stroke-width":0.8},svg);
     el("line",{x1:pdhX-5,y1:pY+pH,x2:pdhX+5,y2:pY+pH,stroke:"#111","stroke-width":0.8},svg);
-    const pdhEl=el("text",{x:pdhX-8,y:pY+pH/2,"font-size":9,"text-anchor":"middle",fill:"#111",transform:`rotate(-90 ${pdhX-8} ${pY+pH/2})`},svg);
-    pdhEl.textContent=`${pRealH}mm`;
+    text(svg, `${pRealH}mm`, pdhX-8, pY+pH/2, 9, "400", "middle", "#111", -90);
     if(footerPage1&&!footerPlaceholder){
       el("image",{href:footerPage1,x:pX,y:pY,width:pW,height:pH,preserveAspectRatio:"xMidYMid meet"},svg);
     } else {
       el("rect",{x:pX,y:pY,width:pW,height:pH,rx:4,fill:"none",stroke:"#bbb","stroke-width":1.2,"stroke-dasharray":"5 4"},svg);
-      const pTxt=el("text",{x:pX+pW/2,y:pY+pH/2+4,"font-size":10,"font-weight":"700","text-anchor":"middle",fill:"#bbb"},svg);
-      pTxt.textContent="PARCEIRO";
+      text(svg, "PARCEIRO", pX+pW/2, pY+pH/2+4, 10, "700", "middle", "#bbb");
     }
     sectionBottomY=pY+pH+10;
   }
